@@ -1,0 +1,16 @@
+{
+  "name": "gestor-motores",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma para monitoreo y gestión de motores eléctricos en tiempo real",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,yml,yaml}\""
+  },
+  "devDependencies": {}
+}
