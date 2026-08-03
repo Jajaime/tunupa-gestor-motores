@@ -23,3 +23,10 @@ The initial database schema is managed through versioned SQL files located in:
 
 ```text
 database/migrations/
+
+## Automatic migration tracking
+
+Applied database migrations are recorded in the PostgreSQL table:
+
+```text
+public.schema_migrations
