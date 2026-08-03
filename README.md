@@ -16,3 +16,10 @@ Eclipse Mosquitto
 TimescaleDB WebSocket
                 |
              Next.js
+
+## Database migrations
+
+The initial database schema is managed through versioned SQL files located in:
+
+```text
+database/migrations/
