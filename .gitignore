@@ -10,10 +10,9 @@ out/
 .turbo/
 coverage/
 
-# Variables y secretos
+# Variables de entorno y secretos
 .env
-.env.local
-.env.*.local
+.env.*
 !.env.example
 
 # Logs

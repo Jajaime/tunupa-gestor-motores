@@ -63,3 +63,9 @@ db-reset:
 	$(DB_MIGRATION_RUNNER) down
 	$(DB_MIGRATION_RUNNER) up
 	$(MAKE) db-test
+
+db-seed:
+	./database/scripts/seed.sh
+
+db-seed-clean:
+	./database/scripts/seed-clean.sh
