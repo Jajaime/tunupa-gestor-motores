@@ -2,14 +2,33 @@ DB_MIGRATION_RUNNER ?= scripts/database/migrate.sh
 DB_SERVICE ?= timescaledb
 DB_TESTS_DIR ?= database/tests
 
-.PHONY: \
-	db-migrate-init \
-	db-migrate-status \
-	db-migrate-current \
-	db-migrate-up \
-	db-migrate-down \
-	db-test \
-	db-reset
+.PHONY: db-up db-down db-logs db-migrate db-backup db-restore-test db-clean-restore-test
+
+db-up:
+	docker compose up -d timescaledb
+
+db-down:
+	docker compose down
+
+db-logs:
+	docker compose logs -f timescaledb
+
+db-migrate:
+	./database/scripts/migrate.sh
+
+db-backup:
+	./database/scripts/backup.sh
+
+db-restore-test:
+	./database/scripts/restore-test.sh
+
+db-clean-restore-test:
+	docker compose exec -T timescaledb sh -c '\
+	  psql \
+	    -v ON_ERROR_STOP=1 \
+	    -U "$$POSTGRES_USER" \
+	    -d postgres \
+	    -c "DROP DATABASE IF EXISTS medicion_motor_restore_test WITH (FORCE);"'
 
 db-migrate-init:
 	$(DB_MIGRATION_RUNNER) init

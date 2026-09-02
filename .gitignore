@@ -47,3 +47,7 @@ grafana-data/
 *.key
 *.crt
 secrets/
+
+# Database backups
+database/backups/*
+!database/backups/.gitkeep
