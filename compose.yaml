@@ -1,4 +1,21 @@
 services:
+  mosquitto:
+    image: eclipse-mosquitto:2.1.2-alpine
+    container_name: gestor-motores-mosquitto
+    restart: unless-stopped
+
+    ports:
+      - "1883:1883"
+
+    volumes:
+      - ./infrastructure/mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./infrastructure/mosquitto/config/passwords:/mosquitto/config/passwords:ro
+      - ./infrastructure/mosquitto/config/acl:/mosquitto/config/acl:ro
+      - mosquitto_data:/mosquitto/data
+
+    networks:
+      - gestor_motores_network
+
   timescaledb:
     image: timescale/timescaledb:latest-pg16
     container_name: gestor-motores-timescaledb
@@ -33,6 +50,9 @@ services:
 volumes:
   timescaledb_data:
     name: gestor-motores-timescaledb-data
+
+  mosquitto_data:
+    name: gestor-motores-mosquitto-data
 
 networks:
   gestor_motores_network:

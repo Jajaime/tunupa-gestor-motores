@@ -1,0 +1,14 @@
+# Usuario compartido por dispositivos durante el desarrollo.
+user esp32
+topic write tunupa/v1/devices/+/telemetry
+topic write tunupa/v1/devices/+/status
+topic read tunupa/v1/devices/+/commands
+topic write tunupa/v1/devices/+/commands/ack
+
+# Servicio NestJS.
+user backend
+topic read tunupa/v1/devices/+/telemetry
+topic read tunupa/v1/devices/+/status
+topic write tunupa/v1/devices/+/commands
+topic read tunupa/v1/devices/+/commands/ack
+topic read $SYS/#
