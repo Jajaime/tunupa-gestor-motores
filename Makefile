@@ -14,13 +14,13 @@ db-logs:
 	docker compose logs -f timescaledb
 
 db-migrate:
-	./database/scripts/migrate.sh
+	$(DB_MIGRATION_RUNNER) up
 
 db-backup:
-	./database/scripts/backup.sh
+	./scripts/database/backup.sh
 
 db-restore-test:
-	./database/scripts/restore-test.sh
+	./scripts/database/restore-test.sh
 
 db-clean-restore-test:
 	docker compose exec -T timescaledb sh -c '\
@@ -65,7 +65,7 @@ db-reset:
 	$(MAKE) db-test
 
 db-seed:
-	./database/scripts/seed.sh
+	./scripts/database/seed.sh
 
 db-seed-clean:
-	./database/scripts/seed-clean.sh
+	./scripts/database/seed-clean.sh
