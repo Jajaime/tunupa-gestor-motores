@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
 import { MotorsModule } from './motors/motors.module';
+import { MqttModule } from './mqtt/mqtt.module';
 
 @Module({
   imports: [
@@ -22,6 +23,15 @@ import { MotorsModule } from './motors/motors.module';
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DB: Joi.string().required(),
+        MQTT_URL: Joi.string()
+          .pattern(/^mqtts?:\/\//)
+          .default('mqtt://localhost:1883'),
+        MQTT_USERNAME: Joi.string().required(),
+        MQTT_PASSWORD: Joi.string().required(),
+        MQTT_TELEMETRY_TOPIC: Joi.string().default(
+          'tunupa/v1/devices/+/telemetry',
+        ),
+        MQTT_STATUS_TOPIC: Joi.string().default('tunupa/v1/devices/+/status'),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -40,6 +50,7 @@ import { MotorsModule } from './motors/motors.module';
     }),
     HealthModule,
     MotorsModule,
+    MqttModule,
   ],
   controllers: [AppController],
   providers: [AppService],
