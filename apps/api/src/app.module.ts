@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { HealthModule } from './health/health.module';
 import { MotorsModule } from './motors/motors.module';
 import { MqttModule } from './mqtt/mqtt.module';
@@ -18,6 +19,7 @@ import { MqttModule } from './mqtt/mqtt.module';
           .valid('development', 'test', 'production')
           .default('development'),
         APP_PORT: Joi.number().port().default(3001),
+        WEB_ORIGIN: Joi.string().uri().default('http://localhost:3000'),
         POSTGRES_HOST: Joi.string().default('localhost'),
         POSTGRES_PORT: Joi.number().port().default(5432),
         POSTGRES_USER: Joi.string().required(),
@@ -51,6 +53,7 @@ import { MqttModule } from './mqtt/mqtt.module';
     HealthModule,
     MotorsModule,
     MqttModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

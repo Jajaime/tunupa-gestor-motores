@@ -11,6 +11,13 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api/v1');
 
+  app.enableCors({
+    origin: configService.getOrThrow<string>('WEB_ORIGIN'),
+    methods: ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -27,6 +34,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('health', 'Estado del backend y sus dependencias')
     .addTag('motors', 'Administración de motores eléctricos')
+    .addTag('dashboard', 'Resumen operativo e histórico de telemetría')
     .build();
 
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);

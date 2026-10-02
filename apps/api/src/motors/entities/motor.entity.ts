@@ -13,6 +13,14 @@ export enum MotorStatus {
   OUT_OF_SERVICE = 'OUT_OF_SERVICE',
 }
 
+export enum MotorOperationalStatus {
+  UNKNOWN = 'UNKNOWN',
+  RUNNING = 'RUNNING',
+  WARNING = 'WARNING',
+  CRITICAL = 'CRITICAL',
+  OFFLINE = 'OFFLINE',
+}
+
 const decimalTransformer: ValueTransformer = {
   to: (value: number | null) => value,
   from: (value: string | null) => (value === null ? null : Number(value)),
@@ -160,6 +168,30 @@ export class Motor {
     default: MotorStatus.ACTIVE,
   })
   status!: MotorStatus;
+
+  @ApiProperty({
+    enum: MotorOperationalStatus,
+    example: MotorOperationalStatus.UNKNOWN,
+  })
+  @Column({
+    name: 'operational_status',
+    type: 'varchar',
+    length: 20,
+    default: MotorOperationalStatus.UNKNOWN,
+  })
+  operationalStatus!: MotorOperationalStatus;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    nullable: true,
+  })
+  @Column({
+    name: 'last_telemetry_at',
+    type: 'timestamptz',
+    nullable: true,
+  })
+  lastTelemetryAt!: Date | null;
 
   @ApiProperty({
     type: String,

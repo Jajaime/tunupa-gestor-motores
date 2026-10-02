@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateMotorDto } from './dto/create-motor.dto';
-import { Motor, MotorStatus } from './entities/motor.entity';
+import {
+  Motor,
+  MotorOperationalStatus,
+  MotorStatus,
+} from './entities/motor.entity';
 import { MotorsController } from './motors.controller';
 import { MotorsService } from './motors.service';
 
@@ -20,6 +24,8 @@ const motorFixture: Motor = {
   ratedCurrent: 2.5,
   ratedFrequencyHz: 50,
   status: MotorStatus.ACTIVE,
+  operationalStatus: MotorOperationalStatus.UNKNOWN,
+  lastTelemetryAt: null,
   createdAt: new Date('2026-09-02T12:00:00.000Z'),
   updatedAt: new Date('2026-09-02T12:00:00.000Z'),
 };

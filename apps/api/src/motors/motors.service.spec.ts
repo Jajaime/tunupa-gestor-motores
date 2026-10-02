@@ -7,7 +7,11 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { QueryFailedError } from 'typeorm';
 import { CreateMotorDto } from './dto/create-motor.dto';
-import { Motor, MotorStatus } from './entities/motor.entity';
+import {
+  Motor,
+  MotorOperationalStatus,
+  MotorStatus,
+} from './entities/motor.entity';
 import { MotorsService } from './motors.service';
 
 interface MockRepository {
@@ -35,6 +39,8 @@ const motorFixture: Motor = {
   ratedCurrent: 2.5,
   ratedFrequencyHz: 50,
   status: MotorStatus.ACTIVE,
+  operationalStatus: MotorOperationalStatus.UNKNOWN,
+  lastTelemetryAt: null,
   createdAt: new Date('2026-09-02T12:00:00.000Z'),
   updatedAt: new Date('2026-09-02T12:00:00.000Z'),
 };
