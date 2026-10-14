@@ -6,12 +6,14 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { HealthService } from './health.service';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
+  @Public()
   @Get()
   @ApiOperation({
     summary: 'Comprobar el estado del backend y PostgreSQL',

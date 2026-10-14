@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -8,6 +10,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { HealthModule } from './health/health.module';
 import { MotorsModule } from './motors/motors.module';
 import { MqttModule } from './mqtt/mqtt.module';
+import { AuthModule } from './auth/auth.module';
+import { AccessTokenGuard } from './auth/guards/access-token.guard';
+import { CsrfGuard } from './auth/guards/csrf.guard';
 
 @Module({
   imports: [
@@ -34,6 +39,12 @@ import { MqttModule } from './mqtt/mqtt.module';
           'tunupa/v1/devices/+/telemetry',
         ),
         MQTT_STATUS_TOPIC: Joi.string().default('tunupa/v1/devices/+/status'),
+        AUTH_ACCESS_SECRET: Joi.string().min(32).required(),
+        AUTH_ACCESS_TTL_SECONDS: Joi.number().integer().min(300).default(900),
+        AUTH_REFRESH_TTL_DAYS: Joi.number().integer().min(1).max(30).default(7),
+        AUTH_COOKIE_SECURE: Joi.boolean().default(false),
+        AUTH_MAX_LOGIN_ATTEMPTS: Joi.number().integer().min(3).default(5),
+        AUTH_LOCK_MINUTES: Joi.number().integer().min(1).default(15),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -54,8 +65,15 @@ import { MqttModule } from './mqtt/mqtt.module';
     MotorsModule,
     MqttModule,
     DashboardModule,
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: CsrfGuard },
+    { provide: APP_GUARD, useClass: AccessTokenGuard },
+  ],
 })
 export class AppModule {}
