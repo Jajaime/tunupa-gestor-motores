@@ -1,0 +1,21 @@
+apiVersion: 1
+
+datasources:
+  - name: Tunupa TimescaleDB
+    uid: tunupa_timescaledb
+    type: postgres
+    access: proxy
+    isDefault: true
+    url: timescaledb:5432
+    user: $__env{GRAFANA_PG_USER}
+    secureJsonData:
+      password: $GRAFANA_PG_PASSWORD
+    jsonData:
+      database: $__env{GRAFANA_PG_DATABASE}
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: true
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 600
+      timeInterval: 10s

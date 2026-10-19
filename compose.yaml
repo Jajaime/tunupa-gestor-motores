@@ -47,7 +47,39 @@ services:
     networks:
       - gestor_motores_network
 
+  grafana:
+    image: grafana/grafana:12.2.0
+    container_name: gestor-motores-grafana
+    restart: unless-stopped
+
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?Definir GRAFANA_ADMIN_USER en .env}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Definir GRAFANA_ADMIN_PASSWORD en .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_SERVER_ROOT_URL: http://localhost:${GRAFANA_PORT:-3001}
+      GRAFANA_PG_DATABASE: ${POSTGRES_DB}
+      GRAFANA_PG_USER: grafana_reader
+      GRAFANA_PG_PASSWORD: ${GRAFANA_DB_PASSWORD:?Definir GRAFANA_DB_PASSWORD en .env}
+
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
+
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+
+    networks:
+      - gestor_motores_network
+
 volumes:
+  grafana_data:
+    name: gestor-motores-grafana-data
+
   timescaledb_data:
     name: gestor-motores-timescaledb-data
 
