@@ -1,0 +1,679 @@
+{
+  "uid": "tunupa-tecnico-v1",
+  "title": "Tunupa | Monitoreo técnico de motores",
+  "tags": [
+    "tunupa",
+    "motores",
+    "timescaledb"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 41,
+  "version": 1,
+  "refresh": "10s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "editable": true,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Motores registrados",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*)::double precision AS value FROM public.motors m WHERE ('${motor:raw}' = 'ALL' OR m.id::text = '${motor:raw}')",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "title": "Motores RUNNING (estado BD)",
+      "type": "stat",
+      "gridPos": {
+        "x": 5,
+        "y": 0,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*)::double precision AS value FROM public.motors m WHERE m.operational_status='RUNNING' AND ('${motor:raw}' = 'ALL' OR m.id::text = '${motor:raw}')",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "Motores OFFLINE (estado BD)",
+      "type": "stat",
+      "gridPos": {
+        "x": 10,
+        "y": 0,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*)::double precision AS value FROM public.motors m WHERE m.operational_status='OFFLINE' AND ('${motor:raw}' = 'ALL' OR m.id::text = '${motor:raw}')",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "title": "Alarmas abiertas",
+      "type": "stat",
+      "gridPos": {
+        "x": 15,
+        "y": 0,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*)::double precision AS value FROM public.alarms a WHERE a.status IN ('ACTIVE','ACKNOWLEDGED') AND ('${motor:raw}' = 'ALL' OR a.motor_id::text = '${motor:raw}') AND ('${device:raw}' = 'ALL' OR a.device_id::text = '${device:raw}')",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 13,
+      "title": "Motores con telemetría recibida (60 s)",
+      "type": "stat",
+      "gridPos": {
+        "x": 20,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT t.motor_id)::double precision AS value FROM public.telemetry t WHERE t.received_at >= NOW() - INTERVAL '60 seconds' AND t.received_at <= NOW() AND ('${motor:raw}' = 'ALL' OR t.motor_id::text = '${motor:raw}') AND ('${device:raw}' = 'ALL' OR t.device_id::text = '${device:raw}')",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "description": "Cantidad de motores distintos con mensajes recibidos durante los últimos 60 segundos. Es una indicación de recepción reciente de datos, no una comprobación directa de enlace, y se calcula independientemente de motors.operational_status. El instante utilizado es received_at, no measured_at."
+    },
+    {
+      "id": 5,
+      "title": "Temperatura",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(t.measured_at, $__interval), AVG(t.value)::double precision AS \"Temperatura\" FROM public.telemetry t WHERE $__timeFilter(t.measured_at) AND ('${motor:raw}' = 'ALL' OR t.motor_id::text = '${motor:raw}') AND ('${device:raw}' = 'ALL' OR t.device_id::text = '${device:raw}') AND t.quality = 'GOOD' AND UPPER(t.measurement_type) = 'TEMPERATURE' GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "title": "Corriente",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(t.measured_at, $__interval), AVG(t.value)::double precision AS \"Corriente\" FROM public.telemetry t WHERE $__timeFilter(t.measured_at) AND ('${motor:raw}' = 'ALL' OR t.motor_id::text = '${motor:raw}') AND ('${device:raw}' = 'ALL' OR t.device_id::text = '${device:raw}') AND t.quality = 'GOOD' AND UPPER(t.measurement_type) = 'CURRENT' GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "unit": "amp"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "title": "Voltaje",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(t.measured_at, $__interval), AVG(t.value)::double precision AS \"Voltaje\" FROM public.telemetry t WHERE $__timeFilter(t.measured_at) AND ('${motor:raw}' = 'ALL' OR t.motor_id::text = '${motor:raw}') AND ('${device:raw}' = 'ALL' OR t.device_id::text = '${device:raw}') AND t.quality = 'GOOD' AND UPPER(t.measurement_type) = 'VOLTAGE' GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "unit": "volt"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "title": "Frecuencia",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 13,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(t.measured_at, $__interval), AVG(t.value)::double precision AS \"Frecuencia\" FROM public.telemetry t WHERE $__timeFilter(t.measured_at) AND ('${motor:raw}' = 'ALL' OR t.motor_id::text = '${motor:raw}') AND ('${device:raw}' = 'ALL' OR t.device_id::text = '${device:raw}') AND t.quality = 'GOOD' AND UPPER(t.measurement_type) = 'FREQUENCY' GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "unit": "hertz"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 9,
+      "title": "Velocidad de rotación",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(t.measured_at, $__interval), AVG(t.value)::double precision AS \"Velocidad de rotación\" FROM public.telemetry t WHERE $__timeFilter(t.measured_at) AND ('${motor:raw}' = 'ALL' OR t.motor_id::text = '${motor:raw}') AND ('${device:raw}' = 'ALL' OR t.device_id::text = '${device:raw}') AND t.quality = 'GOOD' AND UPPER(t.measurement_type) = 'ROTATION_SPEED' GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "unit": "suffix:rpm"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 10,
+      "title": "Vibración",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 22,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(t.measured_at, $__interval), AVG(t.value)::double precision AS \"Vibración\" FROM public.telemetry t WHERE $__timeFilter(t.measured_at) AND ('${motor:raw}' = 'ALL' OR t.motor_id::text = '${motor:raw}') AND ('${device:raw}' = 'ALL' OR t.device_id::text = '${device:raw}') AND t.quality = 'GOOD' AND UPPER(t.measurement_type) = 'VIBRATION' GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "auto",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 11,
+      "title": "Historial de alarmas (por fecha de inicio)",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 31,
+        "w": 24,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT a.started_at AS \"Inicio\", m.code AS \"Motor\", COALESCE(d.device_code, '—') AS \"Dispositivo\", a.alarm_type AS \"Tipo\", a.severity AS \"Severidad\", a.status AS \"Estado\", a.measured_value AS \"Valor\", a.threshold_value AS \"Umbral\", a.unit AS \"Unidad\", a.resolved_at AS \"Resolución\" FROM public.alarms a JOIN public.motors m ON m.id=a.motor_id LEFT JOIN public.devices d ON d.id=a.device_id WHERE $__timeFilter(a.started_at) AND ('${motor:raw}' = 'ALL' OR a.motor_id::text = '${motor:raw}') AND ('${device:raw}' = 'ALL' OR a.device_id::text = '${device:raw}') ORDER BY a.started_at DESC LIMIT 200",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 12,
+      "title": "Últimas mediciones en el rango",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 40,
+        "w": 24,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "tunupa_timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "tunupa_timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "rawSql": "SELECT DISTINCT ON (m.code, d.device_code, UPPER(t.measurement_type)) m.code AS \"Motor\", d.device_code AS \"Dispositivo\", UPPER(t.measurement_type) AS \"Variable\", t.value AS \"Último valor\", t.unit AS \"Unidad\", t.quality AS \"Calidad\", t.measured_at AS \"Medida el\" FROM public.telemetry t JOIN public.motors m ON m.id=t.motor_id JOIN public.devices d ON d.id=t.device_id WHERE $__timeFilter(t.measured_at) AND ('${motor:raw}' = 'ALL' OR t.motor_id::text = '${motor:raw}') AND ('${device:raw}' = 'ALL' OR t.device_id::text = '${device:raw}') ORDER BY m.code, d.device_code, UPPER(t.measurement_type), t.measured_at DESC LIMIT 100",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "motor",
+        "label": "Motor",
+        "type": "query",
+        "datasource": {
+          "type": "postgres",
+          "uid": "tunupa_timescaledb"
+        },
+        "query": "SELECT code || ' · ' || name AS __text, id::text AS __value FROM public.motors ORDER BY code",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": "ALL",
+        "multi": false,
+        "sort": 1,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        }
+      },
+      {
+        "name": "device",
+        "label": "Dispositivo",
+        "type": "query",
+        "datasource": {
+          "type": "postgres",
+          "uid": "tunupa_timescaledb"
+        },
+        "query": "SELECT device_code AS __text, id::text AS __value FROM public.devices WHERE ('${motor:raw}' = 'ALL' OR motor_id::text = '${motor:raw}') ORDER BY device_code",
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": "ALL",
+        "multi": false,
+        "sort": 1,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        }
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  }
+}
