@@ -2,24 +2,8 @@ import 'dotenv/config';
 
 import { randomUUID } from 'node:crypto';
 import { connectAsync, type MqttClient } from 'mqtt';
-
-const scenarios = [
-  'normal',
-  'overtemperature',
-  'overcurrent',
-  'high-vibration',
-  'connection-loss',
-] as const;
-
-type Scenario = (typeof scenarios)[number];
-type Quality = 'GOOD' | 'UNCERTAIN' | 'BAD';
-
-interface Measurement {
-  type: string;
-  value: number;
-  unit: string;
-  quality: Quality;
-}
+import { createMeasurements, scenarios } from './scenarios.js';
+import type { Measurement, Scenario } from './scenarios.js';
 
 interface TelemetryMessage {
   schemaVersion: 1;
@@ -60,6 +44,16 @@ const connectionLossAfter = parsePositiveInteger(
 );
 
 const clients = new Map<string, MqttClient>();
+const ratedCurrent = Number(
+  argumentValue('--rated-current') ?? process.env.SIMULATOR_RATED_CURRENT_A ?? '3',
+);
+if (!Number.isFinite(ratedCurrent) || ratedCurrent <= 0) {
+  throw new Error('La corriente nominal debe ser un número positivo; usa punto decimal.');
+}
+const silenceAfter = parsePositiveInteger(
+  argumentValue('--silence-after') ?? process.env.SIMULATOR_SILENCE_AFTER ?? '5',
+  'cantidad de mensajes antes del silencio',
+);
 let shuttingDown = false;
 
 function requiredEnvironment(name: string): string {
@@ -117,63 +111,6 @@ function parsePositiveInteger(value: string, description: string): number {
   }
 
   return parsed;
-}
-
-function randomBetween(minimum: number, maximum: number): number {
-  return minimum + Math.random() * (maximum - minimum);
-}
-
-function rounded(value: number, decimals = 2): number {
-  const factor = 10 ** decimals;
-  return Math.round(value * factor) / factor;
-}
-
-function measurement(
-  type: string,
-  value: number,
-  unit: string,
-  quality: Quality = 'GOOD',
-): Measurement {
-  return {
-    type,
-    value: rounded(value),
-    unit,
-    quality,
-  };
-}
-
-function createMeasurements(scenario: Scenario): Measurement[] {
-  let temperatureC = randomBetween(48, 65);
-  let currentA = randomBetween(2.4, 3.4);
-  let vibrationMmS = randomBetween(1.2, 2.8);
-
-  switch (scenario) {
-    case 'overtemperature':
-      temperatureC = randomBetween(90, 110);
-      break;
-
-    case 'overcurrent':
-      currentA = randomBetween(5.5, 8);
-      temperatureC = randomBetween(65, 82);
-      break;
-
-    case 'high-vibration':
-      vibrationMmS = randomBetween(8, 15);
-      break;
-
-    case 'normal':
-    case 'connection-loss':
-      break;
-  }
-
-  return [
-    measurement('ROTATION_SPEED', randomBetween(1430, 1490), 'rpm'),
-    measurement('TEMPERATURE', temperatureC, 'C'),
-    measurement('CURRENT', currentA, 'A'),
-    measurement('VOLTAGE', randomBetween(215, 225), 'V'),
-    measurement('FREQUENCY', randomBetween(49.8, 50.2), 'Hz'),
-    measurement('VIBRATION', vibrationMmS, 'mm/s'),
-  ];
 }
 
 function statusTopic(deviceCode: string): string {
@@ -253,6 +190,14 @@ async function runDevice(deviceCode: string): Promise<void> {
   let sequence = 0;
 
   while (!shuttingDown) {
+    if (selectedScenario === 'telemetry-silence' && sequence >= silenceAfter) {
+      if (sequence === silenceAfter) {
+        console.warn(`[${deviceCode}] sin nuevas mediciones; MQTT continúa conectado.`);
+        sequence += 1;
+      }
+      await delay(intervalMs);
+      continue;
+    }
     sequence += 1;
 
     const payload: TelemetryMessage = {
@@ -262,7 +207,7 @@ async function runDevice(deviceCode: string): Promise<void> {
       measuredAt: new Date().toISOString(),
       sequence,
       scenario: selectedScenario,
-      measurements: createMeasurements(selectedScenario),
+      measurements: createMeasurements(selectedScenario, ratedCurrent),
     };
 
     await client.publishAsync(
@@ -340,6 +285,7 @@ try {
   console.log(`Broker: ${mqttUrl}`);
   console.log(`Dispositivos: ${deviceCodes.join(', ')}`);
   console.log(`Intervalo: ${intervalMs} ms`);
+  console.log(`Corriente nominal de referencia: ${ratedCurrent} A`);
 
   await Promise.all(deviceCodes.map((deviceCode) => runDevice(deviceCode)));
 } catch (error) {

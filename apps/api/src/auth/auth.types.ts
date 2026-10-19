@@ -11,6 +11,8 @@ export interface RequestMetadata {
 }
 
 export interface AccessTokenPayload {
+  sid: string;
+  exp: number;
   sub: string;
   email: string;
   role: string;

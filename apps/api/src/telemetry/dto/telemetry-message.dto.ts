@@ -19,6 +19,7 @@ export enum TelemetryScenario {
   OVERCURRENT = 'overcurrent',
   HIGH_VIBRATION = 'high-vibration',
   CONNECTION_LOSS = 'connection-loss',
+  TELEMETRY_SILENCE = 'telemetry-silence',
 }
 
 export enum MeasurementType {

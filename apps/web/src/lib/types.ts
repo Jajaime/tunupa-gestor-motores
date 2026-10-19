@@ -1,3 +1,10 @@
+export interface AuthUser {
+  id: string;
+  email: string;
+  displayName?: string;
+  role: 'ADMIN' | 'OPERATOR' | 'VIEWER';
+}
+
 export interface LatestMeasurement {
   value: number;
   unit: string;

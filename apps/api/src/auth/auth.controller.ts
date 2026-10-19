@@ -79,10 +79,8 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
-    await this.auth.logout(
-      request.cookies?.[REFRESH_COOKIE] as string | undefined,
-      this.metadata(request),
-    );
+    const user = request.user as AccessTokenPayload;
+    await this.auth.logout(user.sid, user.sub, this.metadata(request));
     response.clearCookie(ACCESS_COOKIE, this.cookieOptions(true));
     response.clearCookie(REFRESH_COOKIE, this.cookieOptions(true));
   }

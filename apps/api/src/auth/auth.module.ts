@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { SessionAccessService } from './session-access.service';
 import { AuthSession } from './entities/auth-session.entity';
 import { User } from './entities/user.entity';
 
@@ -18,7 +19,7 @@ import { User } from './entities/user.entity';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
-  exports: [JwtModule, AuthService],
+  providers: [AuthService, SessionAccessService],
+  exports: [JwtModule, AuthService, SessionAccessService],
 })
 export class AuthModule {}

@@ -13,7 +13,7 @@ const context = {
 
 describe('AccessTokenGuard', () => {
   const reflector = { getAllAndOverride: jest.fn().mockReturnValue(false) };
-  const jwt = { verifyAsync: jest.fn() };
+  const jwt = { verify: jest.fn() };
   const guard = new AccessTokenGuard(reflector as never, jwt as never);
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('AccessTokenGuard', () => {
 
   it('adjunta el usuario de un token válido', async () => {
     request.cookies.tunupa_access = 'token';
-    jwt.verifyAsync.mockResolvedValue({
+    jwt.verify.mockResolvedValue({
       sub: 'user-id',
       email: 'admin@example.com',
       role: 'ADMIN',

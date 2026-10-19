@@ -10,6 +10,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { HealthModule } from './health/health.module';
 import { MotorsModule } from './motors/motors.module';
 import { MqttModule } from './mqtt/mqtt.module';
+import { RealtimeModule } from './realtime/realtime.module';
 import { AuthModule } from './auth/auth.module';
 import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { CsrfGuard } from './auth/guards/csrf.guard';
@@ -39,6 +40,16 @@ import { CsrfGuard } from './auth/guards/csrf.guard';
           'tunupa/v1/devices/+/telemetry',
         ),
         MQTT_STATUS_TOPIC: Joi.string().default('tunupa/v1/devices/+/status'),
+        TELEMETRY_TIMEOUT_SECONDS: Joi.number()
+          .integer()
+          .min(5)
+          .max(3600)
+          .default(30),
+        TELEMETRY_CHECK_INTERVAL_MS: Joi.number()
+          .integer()
+          .min(1000)
+          .max(60000)
+          .default(5000),
         AUTH_ACCESS_SECRET: Joi.string().min(32).required(),
         AUTH_ACCESS_TTL_SECONDS: Joi.number().integer().min(300).default(900),
         AUTH_REFRESH_TTL_DAYS: Joi.number().integer().min(1).max(30).default(7),
@@ -67,6 +78,7 @@ import { CsrfGuard } from './auth/guards/csrf.guard';
     DashboardModule,
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
     AuthModule,
+    RealtimeModule,
   ],
   controllers: [AppController],
   providers: [

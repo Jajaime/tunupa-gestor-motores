@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RealtimeAdapter } from './realtime/realtime.adapter';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
@@ -10,6 +11,10 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
+  app.enableShutdownHooks();
+  app.useWebSocketAdapter(
+    new RealtimeAdapter(app, configService.getOrThrow<string>('WEB_ORIGIN')),
+  );
   const logger = new Logger('Bootstrap');
   const isProduction = configService.get<string>('NODE_ENV') === 'production';
 

@@ -1,3 +1,4 @@
+import { CommittedEventsService } from '../realtime/committed-events.service';
 import { Injectable } from '@nestjs/common';
 import { DataSource, type EntityManager } from 'typeorm';
 import {
@@ -9,11 +10,10 @@ import {
   type MeasurementDto,
   type TelemetryMessageDto,
 } from './dto/telemetry-message.dto';
+import { MotorStateService } from './motor-state.service';
+import type { MotorOperationalStatus } from './motor-state.service';
 
 type AlarmSeverity = 'WARNING' | 'CRITICAL';
-
-type MotorOperationalStatus =
-  'UNKNOWN' | 'RUNNING' | 'WARNING' | 'CRITICAL' | 'OFFLINE';
 
 interface DeviceContext {
   device_id: string;
@@ -25,12 +25,19 @@ interface ExistingMessage {
   exists: boolean;
 }
 
+interface AlarmRow {
+  id: string;
+  alarm_type: string;
+  severity: string;
+  status: string;
+  measured_value: string | number | null;
+  threshold_value: string | number | null;
+  unit: string | null;
+  started_at: Date;
+  resolved_at: Date | null;
+}
 interface OpenAlarm {
   id: string;
-}
-
-interface OperationalStatusResult {
-  operational_status: MotorOperationalStatus;
 }
 
 interface AlarmRule {
@@ -50,7 +57,11 @@ export interface TelemetryProcessingResult {
 
 @Injectable()
 export class TelemetryIngestionService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly motorState: MotorStateService,
+    private readonly events: CommittedEventsService,
+  ) {}
 
   async processTelemetry(
     topic: string,
@@ -145,16 +156,12 @@ export class TelemetryIngestionService {
         );
       }
 
-      const operationalStatus = await this.calculateOperationalStatus(
-        manager,
-        device.device_id,
-      );
-
       await manager.query(
         `
           UPDATE public.devices
           SET
             last_connection_at = CURRENT_TIMESTAMP,
+            last_telemetry_received_at = clock_timestamp(),
             status = CASE
               WHEN status IN ('REGISTERED', 'INACTIVE')
                 THEN 'ACTIVE'
@@ -169,18 +176,41 @@ export class TelemetryIngestionService {
         `
           UPDATE public.motors
           SET
-            operational_status = $1,
             last_telemetry_at = CASE
               WHEN last_telemetry_at IS NULL
-                OR last_telemetry_at < $2
-                THEN $2
+                OR last_telemetry_at < $1
+                THEN $1
               ELSE last_telemetry_at
             END
-          WHERE id = $3;
+          WHERE id = $2;
         `,
-        [operationalStatus, measuredAt, device.motor_id],
+        [measuredAt, device.motor_id],
       );
 
+      const operationalStatus = await this.motorState.refresh(
+        manager,
+        device.motor_id,
+        { deviceId: device.device_id, reason: 'TELEMETRY_RECEIVED' },
+      );
+
+      this.events.record(
+        manager,
+        'telemetry.received',
+        device.motor_id,
+        device.device_id,
+        {
+          messageId: message.messageId,
+          measuredAt: measuredAt.toISOString(),
+          measurements: message.measurements.map(
+            ({ type, value, unit, quality }) => ({
+              type,
+              value,
+              unit,
+              quality,
+            }),
+          ),
+        },
+      );
       return {
         duplicate: false,
         deviceCode: message.deviceCode,
@@ -211,18 +241,10 @@ export class TelemetryIngestionService {
           [device.device_id],
         );
 
-        await manager.query(
-          `
-            UPDATE public.motors
-            SET operational_status = CASE
-              WHEN operational_status = 'OFFLINE'
-                THEN 'UNKNOWN'
-              ELSE operational_status
-            END
-            WHERE id = $1;
-          `,
-          [device.motor_id],
-        );
+        await this.motorState.refresh(manager, device.motor_id, {
+          deviceId: device.device_id,
+          reason: 'MQTT_ONLINE',
+        });
 
         return;
       }
@@ -240,14 +262,10 @@ export class TelemetryIngestionService {
         [device.device_id],
       );
 
-      await manager.query(
-        `
-          UPDATE public.motors
-          SET operational_status = 'OFFLINE'
-          WHERE id = $1;
-        `,
-        [device.motor_id],
-      );
+      await this.motorState.refresh(manager, device.motor_id, {
+        deviceId: device.device_id,
+        reason: 'MQTT_OFFLINE',
+      });
     });
   }
 
@@ -290,7 +308,7 @@ export class TelemetryIngestionService {
         INNER JOIN public.motors m
           ON m.id = d.motor_id
         WHERE d.device_code = $1
-        FOR UPDATE OF d, m;
+        FOR UPDATE OF m;
       `,
       [deviceCode],
     );
@@ -333,19 +351,21 @@ export class TelemetryIngestionService {
     const openAlarm = openAlarms[0];
 
     if (measurement.value < rule.warningThreshold) {
-      await manager.query(
+      if (!openAlarm) return;
+      const resolved = await manager.query<AlarmRow[]>(
         `
-          UPDATE public.alarms
+          WITH changed AS (UPDATE public.alarms
           SET
             status = 'RESOLVED',
             resolved_at = CURRENT_TIMESTAMP
           WHERE device_id = $1
             AND alarm_type = $2
-            AND status IN ('ACTIVE', 'ACKNOWLEDGED');
+            AND status IN ('ACTIVE', 'ACKNOWLEDGED')
+          RETURNING *) SELECT * FROM changed;
         `,
         [device.device_id, rule.alarmType],
       );
-
+      this.recordAlarms(manager, device, resolved, 'RESOLVED');
       return;
     }
 
@@ -360,25 +380,25 @@ export class TelemetryIngestionService {
       `umbral ${threshold} ${measurement.unit}.`;
 
     if (openAlarm) {
-      await manager.query(
+      const updated = await manager.query<AlarmRow[]>(
         `
-          UPDATE public.alarms
+          WITH changed AS (UPDATE public.alarms
           SET
-            severity = $2,
+            severity = $2::varchar,
             message = $3,
             measured_value = $4,
             threshold_value = $5,
             unit = $6,
             status = CASE
-              WHEN severity <> $2 THEN 'ACTIVE'
+              WHEN severity <> $2::varchar THEN 'ACTIVE'
               ELSE status
             END,
             acknowledged_at = CASE
-              WHEN severity <> $2 THEN NULL
+              WHEN severity <> $2::varchar THEN NULL
               ELSE acknowledged_at
             END,
             resolved_at = NULL
-          WHERE id = $1;
+          WHERE id = $1 RETURNING *) SELECT * FROM changed;
         `,
         [
           openAlarm.id,
@@ -389,11 +409,11 @@ export class TelemetryIngestionService {
           measurement.unit,
         ],
       );
-
+      this.recordAlarms(manager, device, updated, 'UPDATED');
       return;
     }
 
-    await manager.query(
+    const created = await manager.query<AlarmRow[]>(
       `
         INSERT INTO public.alarms (
           motor_id,
@@ -418,7 +438,7 @@ export class TelemetryIngestionService {
           $8,
           $9,
           'ACTIVE'
-        );
+        ) RETURNING *;
       `,
       [
         device.motor_id,
@@ -432,6 +452,39 @@ export class TelemetryIngestionService {
         measuredAt,
       ],
     );
+    this.recordAlarms(manager, device, created, 'CREATED');
+  }
+
+  private recordAlarms(
+    manager: EntityManager,
+    device: DeviceContext,
+    rows: AlarmRow[],
+    change: 'CREATED' | 'UPDATED' | 'RESOLVED',
+  ): void {
+    for (const row of rows)
+      this.events.record(
+        manager,
+        'alarm.changed',
+        device.motor_id,
+        device.device_id,
+        {
+          id: row.id,
+          alarmType: row.alarm_type,
+          severity: row.severity,
+          status: row.status,
+          change,
+          measuredValue:
+            row.measured_value === null ? null : Number(row.measured_value),
+          thresholdValue:
+            row.threshold_value === null ? null : Number(row.threshold_value),
+          unit: row.unit,
+          startedAt: new Date(row.started_at).toISOString(),
+          resolvedAt:
+            row.resolved_at === null
+              ? null
+              : new Date(row.resolved_at).toISOString(),
+        },
+      );
   }
 
   private getAlarmRule(
@@ -471,29 +524,5 @@ export class TelemetryIngestionService {
     }
 
     return null;
-  }
-
-  private async calculateOperationalStatus(
-    manager: EntityManager,
-    deviceId: string,
-  ): Promise<MotorOperationalStatus> {
-    const rows = await manager.query<OperationalStatusResult[]>(
-      `
-          SELECT
-            CASE
-              WHEN bool_or(severity = 'CRITICAL')
-                THEN 'CRITICAL'
-              WHEN bool_or(severity = 'WARNING')
-                THEN 'WARNING'
-              ELSE 'RUNNING'
-            END AS operational_status
-          FROM public.alarms
-          WHERE device_id = $1
-            AND status IN ('ACTIVE', 'ACKNOWLEDGED');
-        `,
-      [deviceId],
-    );
-
-    return rows[0]?.operational_status ?? 'RUNNING';
   }
 }

@@ -1,15 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getDashboardMotors, getMotorHistory } from '@/lib/api';
+import { useMemo } from 'react';
+import { useLiveDashboard } from './use-live-dashboard';
 import type {
-  DashboardMotorSummary,
   LatestMeasurement,
-  TelemetryHistoryPoint,
 } from '@/lib/types';
+import { RealtimeStatus } from './realtime-status';
 import { TelemetryChart } from './telemetry-chart';
+import { useAuth } from '@/components/auth/auth-provider';
+import { connectionLabel, summarizeMotorStates } from '@/lib/dashboard-status';
 
-const REFRESH_INTERVAL_MS = 5_000;
 
 const measurements = [
   { type: 'TEMPERATURE', label: 'Temperatura', short: 'TEMP' },
@@ -71,71 +71,18 @@ function MeasurementCard({
 }
 
 export function Dashboard() {
-  const [motors, setMotors] = useState<DashboardMotorSummary[]>([]);
-  const [selectedMotorId, setSelectedMotorId] = useState<string>('');
-  const [selectedMeasurement, setSelectedMeasurement] =
-    useState<string>('TEMPERATURE');
-  const [history, setHistory] = useState<TelemetryHistoryPoint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [historyLoading, setHistoryLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
-
-  const loadMotors = useCallback(async () => {
-    try {
-      const result = await getDashboardMotors();
-      setMotors(result);
-      setSelectedMotorId((current) =>
-        result.some((motor) => motor.id === current) ? current : (result[0]?.id ?? ''),
-      );
-      setLastRefresh(new Date());
-      setError(null);
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible consultar la API.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const loadHistory = useCallback(async () => {
-    if (!selectedMotorId) return;
-    setHistoryLoading(true);
-    try {
-      const result = await getMotorHistory(selectedMotorId, selectedMeasurement);
-      setHistory(result);
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No fue posible cargar el histórico.');
-    } finally {
-      setHistoryLoading(false);
-    }
-  }, [selectedMeasurement, selectedMotorId]);
-
-  useEffect(() => {
-    const initialLoad = window.setTimeout(() => void loadMotors(), 0);
-    const timer = window.setInterval(() => void loadMotors(), REFRESH_INTERVAL_MS);
-    return () => {
-      window.clearTimeout(initialLoad);
-      window.clearInterval(timer);
-    };
-  }, [loadMotors]);
-
-  useEffect(() => {
-    const initialLoad = window.setTimeout(() => void loadHistory(), 0);
-    const timer = window.setInterval(() => void loadHistory(), REFRESH_INTERVAL_MS);
-    return () => {
-      window.clearTimeout(initialLoad);
-      window.clearInterval(timer);
-    };
-  }, [loadHistory]);
+  const { user, error: sessionError, signOut } = useAuth();
+  const { motors, selectedMotorId, selectedMeasurement, setSelectedMotorId,
+    setSelectedMeasurement, history, loading, historyLoading, error, lastRefresh,
+    apiConnection, realtimeStatus, refresh } = useLiveDashboard();
 
   const selectedMotor = useMemo(
     () => motors.find((motor) => motor.id === selectedMotorId) ?? null,
     [motors, selectedMotorId],
   );
-  const onlineCount = motors.filter((motor) =>
-    ['RUNNING', 'ONLINE'].includes(motor.operationalStatus),
-  ).length;
-  const alarmCount = motors.reduce((total, motor) => total + motor.activeAlarmCount, 0);
+  const summary = summarizeMotorStates(motors);
+  const readingsAreStale = realtimeStatus !== 'connected' || apiConnection === 'disconnected'
+    || selectedMotor?.operationalStatus === 'OFFLINE';
   const selectedMeasurementLabel =
     measurements.find(({ type }) => type === selectedMeasurement)?.label ?? selectedMeasurement;
 
@@ -152,8 +99,11 @@ export function Dashboard() {
           <a className="nav-item" href="#history">Histórico</a>
         </nav>
         <div className="sidebar-footer">
-          <span className="live-dot" /> API conectada
-          <small>{lastRefresh ? `Actualizado ${lastRefresh.toLocaleTimeString('es-CL')}` : 'Conectando…'}</small>
+          <span className={`live-dot ${apiConnection}`} aria-hidden="true" />
+          <span role="status">{connectionLabel(apiConnection)}</span>
+          <small>{lastRefresh
+            ? `Última consulta correcta ${lastRefresh.toLocaleTimeString('es-CL')}`
+            : 'Sin consulta correcta todavía'}</small>
         </div>
       </aside>
 
@@ -164,23 +114,32 @@ export function Dashboard() {
             <h1>Estado de la operación</h1>
             <p>Telemetría, condición y alarmas de los motores conectados.</p>
           </div>
-          <button className="refresh-button" onClick={() => void loadMotors()} type="button">
-            Actualizar
-          </button>
+          <div className="session-actions">
+            <span className="session-user">{user?.displayName ?? user?.email}</span>
+            <RealtimeStatus status={realtimeStatus} />
+            <div>
+              <button className="refresh-button" onClick={refresh} type="button">
+                Actualizar
+              </button>
+              <button className="refresh-button" onClick={() => void signOut()} type="button">
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
         </header>
 
-        {error && (
+        {(error ?? sessionError) && (
           <div className="error-banner" role="alert">
-            <span>{error} Verifica que la API esté activa en el puerto 3001.</span>
-            <button type="button" onClick={() => void loadMotors()}>Reintentar</button>
+            <span>{error ?? sessionError}</span>
+            <button type="button" onClick={refresh}>Reintentar</button>
           </div>
         )}
 
         <section className="summary-grid" aria-label="Resumen de operación">
           <article><span>Total motores</span><strong>{motors.length}</strong><small>Registrados</small></article>
-          <article><span>En línea</span><strong>{onlineCount}</strong><small>Transmitiendo datos</small></article>
-          <article><span>Alarmas activas</span><strong className={alarmCount ? 'text-alert' : ''}>{alarmCount}</strong><small>Requieren revisión</small></article>
-          <article><span>Desconectados</span><strong>{motors.length - onlineCount}</strong><small>Sin transmisión</small></article>
+          <article><span>En línea</span><strong>{summary.online}</strong><small>Incluye equipos con alarmas</small></article>
+          <article><span>Alarmas activas</span><strong className={summary.alarms ? 'text-alert' : ''}>{summary.alarms}</strong><small>Requieren revisión</small></article>
+          <article><span>Desconectados</span><strong>{summary.offline}</strong><small>{summary.unknown ? `${summary.unknown} equipos adicionales sin datos` : 'Sin telemetría reciente'}</small></article>
         </section>
 
         <section className="panel" id="motors">
@@ -220,9 +179,18 @@ export function Dashboard() {
         {selectedMotor && (
           <>
             <section className="section-heading">
-              <div><span className="eyebrow">{selectedMotor.code}</span><h2>Indicadores actuales</h2></div>
+              <div><span className="eyebrow">{selectedMotor.code}</span><h2>{readingsAreStale ? 'Últimos indicadores recibidos' : 'Indicadores actuales'}</h2></div>
               <span>Última lectura: {formatDate(selectedMotor.lastTelemetryAt)}</span>
             </section>
+            {readingsAreStale && (
+              <p className="telemetry-notice" role="status">
+                {apiConnection === 'disconnected'
+                  ? 'No se puede actualizar la información. Se muestran las últimas lecturas guardadas.'
+                  : selectedMotor.operationalStatus === 'OFFLINE'
+                    ? 'Sin telemetría reciente. Se muestran las últimas lecturas guardadas.'
+                    : 'Actualización en tiempo real interrumpida. Se muestran las últimas lecturas consultadas.'}
+              </p>
+            )}
             <section className="measurements-grid">
               {measurements.map(({ type, label, short }) => (
                 <MeasurementCard key={type} label={label} short={short} measurement={selectedMotor.latestMeasurements[type]} />

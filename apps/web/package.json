@@ -8,13 +8,18 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "npm run typecheck"
+    "test": "npm run typecheck && npm run test:auth && npm run test:dashboard && npm run test:realtime && npm run test:updates",
+    "test:auth": "node --test tests/auth-api.test.mjs",
+    "test:dashboard": "node --test tests/dashboard-status.test.mjs",
+    "test:realtime": "node --test tests/realtime-session.test.mjs",
+    "test:updates": "node --test tests/live-updates.test.mjs"
   },
   "dependencies": {
     "next": "16.3.8",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "recharts": "3.10.1"
+    "recharts": "3.10.1",
+    "socket.io-client": "4.8.3"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
