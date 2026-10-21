@@ -1,5 +1,5 @@
 # Contexto de build: ./apps/web; next.config.ts utiliza output: standalone.
-FROM node:24-bookworm-slim AS build
+FROM node:24-trixie-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
@@ -11,7 +11,7 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN test -n "$NEXT_PUBLIC_API_URL" && npm run build
 
-FROM node:24-bookworm-slim AS runner
+FROM node:24-trixie-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
