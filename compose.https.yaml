@@ -1,0 +1,46 @@
+# Overlay HTTPS OPCIONAL, para servidor con DNS publico y puertos 80/443 accesibles.
+# Docker Compose >= 2.24.4 por uso de !override.
+# Usar SOLO con: -f compose.yaml -f compose.docker.yaml -f compose.https.yaml
+# No mezclar con compose.caddy.yaml. No activa HTTPS por si solo.
+services:
+  api:
+    environment:
+      # El overlay impone las cookies seguras y el mismo origen TLS de Caddy.
+      AUTH_COOKIE_SECURE: "true"
+      WEB_ORIGIN: "https://${CADDY_DOMAIN:?Definir CADDY_DOMAIN con un dominio publico real}"
+
+  web:
+    build:
+      args:
+        # Las variables NEXT_PUBLIC_* se incorporan al bundle en BUILD TIME.
+        NEXT_PUBLIC_API_URL: "https://${CADDY_DOMAIN:?Definir CADDY_DOMAIN}/api/v1"
+
+  grafana:
+    environment:
+      GF_SERVER_ROOT_URL: "https://${CADDY_DOMAIN:?Definir CADDY_DOMAIN}/grafana/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    # Solo se accede a Grafana a traves del reverse proxy en esta variante.
+    ports: !override []
+
+  mosquitto:
+    # MQTT sin TLS no se publica a Internet en este overlay.
+    # Este binding mantiene disponible el simulador en la maquina anfitriona.
+    ports: !override
+      - "127.0.0.1:1883:1883"
+
+  timescaledb:
+    # PostgreSQL limitado al host para tareas administrativas locales.
+    ports: !override
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+
+  caddy:
+    ports: !override
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes: !override
+      - ./infrastructure/caddy/Caddyfile.https:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      CADDY_DOMAIN: ${CADDY_DOMAIN:?Definir CADDY_DOMAIN con un dominio publico real}
