@@ -1,0 +1,73 @@
+name: Tunupa CI - Integration (TimescaleDB)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tunupa-integration-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: API - telemetry, realtime and events (DB)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      # SOLO para esta base efímera de CI. No utilizar credenciales reales.
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_DB: tunupa_ci
+      POSTGRES_USER: tunupa_ci
+      POSTGRES_PASSWORD: ci_ephemeral_only_not_a_secret
+      NODE_ENV: test
+    services:
+      timescaledb:
+        # Igual familia de imagen que compose.yaml: PostgreSQL 16 + TimescaleDB.
+        image: timescale/timescaledb:latest-pg16
+        env:
+          POSTGRES_DB: tunupa_ci
+          POSTGRES_USER: tunupa_ci
+          POSTGRES_PASSWORD: ci_ephemeral_only_not_a_secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tunupa_ci -d tunupa_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            apps/api/package-lock.json
+            apps/simulator/package-lock.json
+      - name: Install PostgreSQL CLI
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+      - name: Install API dependencies
+        run: npm ci --prefix apps/api --no-audit --no-fund
+      - name: Install simulator dependencies
+        run: npm ci --prefix apps/simulator --no-audit --no-fund
+      - name: Apply all schema migrations to ephemeral TimescaleDB
+        run: bash scripts/ci/apply-test-migrations.sh
+      - name: Telemetry integration
+        working-directory: apps/api
+        run: npm run test:telemetry
+      - name: HTTP session and WebSocket integration
+        working-directory: apps/api
+        run: npm run test:realtime
+      - name: Committed events and watchdog integration
+        working-directory: apps/api
+        run: npm run test:events
