@@ -1,0 +1,22 @@
+# Optional local Caddy layer: docker compose -f compose.yaml -f compose.caddy.yaml ...
+services:
+  caddy:
+    image: caddy:2.10.2-alpine
+    container_name: gestor-motores-caddy
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${CADDY_PORT:-8080}:80"
+    volumes:
+      - ./infrastructure/caddy/Caddyfile.local:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      CADDY_WSL_HOST: ${CADDY_WSL_HOST:?Definir CADDY_WSL_HOST en .env}  
+    networks:
+      - gestor_motores_network
+
+volumes:
+  caddy_data:
+    name: gestor-motores-caddy-data
+  caddy_config:
+    name: gestor-motores-caddy-config

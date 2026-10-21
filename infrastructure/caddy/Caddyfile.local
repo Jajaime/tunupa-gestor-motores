@@ -1,0 +1,27 @@
+# Tunupa - Reverse proxy local
+# Solo para desarrollo HTTP.
+
+:80 {
+    encode zstd gzip
+
+    @api path /api/v1 /api/v1/*
+    handle @api {
+        reverse_proxy {$CADDY_WSL_HOST}:3002
+    }
+
+    @socket path /socket.io /socket.io/*
+    handle @socket {
+        reverse_proxy {$CADDY_WSL_HOST}:3002
+    }
+
+    handle {
+        reverse_proxy {$CADDY_WSL_HOST}:3000
+    }
+
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        X-Frame-Options DENY
+        -Server
+    }
+}
