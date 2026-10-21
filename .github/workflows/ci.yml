@@ -1,0 +1,119 @@
+name: Tunupa CI - Quality and Docker
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tunupa-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API - lint, build, unit tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      # No ejecutar `npm run lint`: ese script incluye --fix y modifica archivos.
+      - name: ESLint without automatic fixes
+        run: npx eslint 'src/**/*.ts' 'test/**/*.ts' --max-warnings=0
+      - name: Compile NestJS
+        run: npm run build
+      - name: Run Jest unit tests
+        run: npm test -- --runInBand
+      - name: Audit runtime dependencies (baseline only)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+  web:
+    name: Web - lint, build, tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: ESLint
+        run: npm run lint
+      - name: TypeScript and frontend tests
+        run: npm test
+      - name: Build Next.js
+        env:
+          NEXT_PUBLIC_API_URL: https://example.invalid/api/v1
+        run: npm run build
+      - name: Audit runtime dependencies (baseline only)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+  simulator:
+    name: Simulator - typecheck, build, tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/simulator
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/simulator/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Compile simulator
+        run: npm run build
+      - name: Unit tests
+        run: npm test
+      - name: Audit runtime dependencies (baseline only)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+  docker-build:
+    name: Docker - build API and Web images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs: [api, web]
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build NestJS image
+        run: docker build -f apps/api/Dockerfile -t tunupa-api:ci ./apps/api
+      - name: Build Next.js image
+        run: >-
+          docker build -f apps/web/Dockerfile
+          --build-arg NEXT_PUBLIC_API_URL=https://example.invalid/api/v1
+          -t tunupa-web:ci ./apps/web
