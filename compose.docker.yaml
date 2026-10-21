@@ -1,0 +1,100 @@
+# Alternativa a compose.caddy.yaml para ejecutar API, web y Caddy en Docker.
+# USAR con: docker compose -f compose.yaml -f compose.docker.yaml ...
+# No combinar compose.docker.yaml con compose.caddy.yaml.
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    image: tunupa-api:local
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: production
+      APP_PORT: "3002"
+      WEB_ORIGIN: ${WEB_ORIGIN:?Definir WEB_ORIGIN en .env}
+      POSTGRES_HOST: timescaledb
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER:?Definir POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Definir POSTGRES_DB en .env}
+      MQTT_URL: mqtt://mosquitto:1883
+      MQTT_USERNAME: ${MQTT_USERNAME:?Definir MQTT_USERNAME en .env}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:?Definir MQTT_PASSWORD en .env}
+      MQTT_TELEMETRY_TOPIC: ${MQTT_TELEMETRY_TOPIC:-tunupa/v1/devices/+/telemetry}
+      MQTT_STATUS_TOPIC: ${MQTT_STATUS_TOPIC:-tunupa/v1/devices/+/status}
+      TELEMETRY_TIMEOUT_SECONDS: ${TELEMETRY_TIMEOUT_SECONDS:-30}
+      TELEMETRY_CHECK_INTERVAL_MS: ${TELEMETRY_CHECK_INTERVAL_MS:-5000}
+      AUTH_ACCESS_SECRET: ${AUTH_ACCESS_SECRET:?Definir AUTH_ACCESS_SECRET en .env}
+      AUTH_ACCESS_TTL_SECONDS: ${AUTH_ACCESS_TTL_SECONDS:-900}
+      AUTH_REFRESH_TTL_DAYS: ${AUTH_REFRESH_TTL_DAYS:-7}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
+      AUTH_MAX_LOGIN_ATTEMPTS: ${AUTH_MAX_LOGIN_ATTEMPTS:-5}
+      AUTH_LOCK_MINUTES: ${AUTH_LOCK_MINUTES:-15}
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3002/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - gestor_motores_network
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: "${WEB_ORIGIN:?Definir WEB_ORIGIN en .env}/api/v1"
+    image: tunupa-web:local
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - gestor_motores_network
+
+  caddy:
+    image: caddy:2.10.2-alpine
+    container_name: gestor-motores-caddy
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${CADDY_PORT:-8080}:80"
+    volumes:
+      - ./infrastructure/caddy/Caddyfile.docker:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    networks:
+      - gestor_motores_network
+
+volumes:
+  caddy_data:
+    name: gestor-motores-caddy-data
+  caddy_config:
+    name: gestor-motores-caddy-config

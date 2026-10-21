@@ -1,0 +1,12 @@
+node_modules
+dist
+coverage
+test
+*.log
+*.tsbuildinfo
+.env*
+.git
+.vscode
+*.pem
+*.key
+*.crt

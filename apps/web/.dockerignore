@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+coverage
+dist
+*.tsbuildinfo
+*.log
+.env*
+.git
+.vscode
+*.pem
+*.key
+*.crt
