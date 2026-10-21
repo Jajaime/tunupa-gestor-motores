@@ -12,6 +12,14 @@
         reverse_proxy api:3002
     }
 
+    # Normalizar la URL base de Grafana para sus enlaces y recursos.
+    redir /grafana /grafana/ 308
+
+    # Grafana usa su propia autenticacion. Conservamos el prefijo /grafana/.
+    handle /grafana/* {
+        reverse_proxy grafana:3000
+    }
+
     handle {
         reverse_proxy web:3000
     }

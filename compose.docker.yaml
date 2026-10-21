@@ -2,6 +2,12 @@
 # USAR con: docker compose -f compose.yaml -f compose.docker.yaml ...
 # No combinar compose.docker.yaml con compose.caddy.yaml.
 services:
+  # Override del servicio existente, sin cambiar sus datos ni provisionamiento.
+  grafana:
+    environment:
+      GF_SERVER_ROOT_URL: "${WEB_ORIGIN:?Definir WEB_ORIGIN en .env}/grafana/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+
   api:
     build:
       context: ./apps/api
