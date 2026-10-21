@@ -1,0 +1,196 @@
+name: Tunupa CI - DevSecOps Scanning
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Reejecutar analisis aun si no hubo commits: lunes 07:20 UTC.
+    - cron: '20 7 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tunupa-security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-audit:
+    name: npm audit - ${{ matrix.project }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: api
+            path: apps/api
+          - project: web
+            path: apps/web
+          - project: simulator
+            path: apps/simulator
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Audit runtime dependencies (baseline, not a release gate)
+        working-directory: ${{ matrix.path }}
+        shell: bash
+        run: |
+          # npm audit puede devolver 1 por vulnerabilidades; el resumen las hace visibles.
+          # No utilizar secretos ni instalar dependencias para este informe.
+          npm audit --omit=dev --json > "$RUNNER_TEMP/npm-audit-${{ matrix.project }}.json" || true
+          python3 ../../scripts/ci/security_report.py npm \
+            "$RUNNER_TEMP/npm-audit-${{ matrix.project }}.json" \
+            "npm audit ${{ matrix.project }}"
+      - name: Save audit report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: npm-audit-${{ matrix.project }}
+          path: ${{ runner.temp }}/npm-audit-${{ matrix.project }}.json
+          if-no-files-found: error
+          retention-days: 14
+
+  trivy-config:
+    name: Trivy - Compose and Dockerfile configuration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Scan IaC misconfigurations (baseline)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          format: sarif
+          output: trivy-config.sarif
+          exit-code: '0'
+      - name: Summarize IaC findings
+        run: python3 scripts/ci/security_report.py sarif trivy-config.sarif 'Trivy IaC'
+      - name: Save IaC report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: trivy-config
+          path: trivy-config.sarif
+          if-no-files-found: error
+          retention-days: 14
+      # Los PR externos no reciben un token con permisos de escritura.
+      - name: Send IaC findings to GitHub Code Scanning
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
+        with:
+          sarif_file: trivy-config.sarif
+          category: trivy-config
+
+  trivy-image:
+    name: Trivy image - ${{ matrix.project }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: api
+            context: ./apps/api
+            dockerfile: apps/api/Dockerfile
+          - project: web
+            context: ./apps/web
+            dockerfile: apps/web/Dockerfile
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build API image for scanning
+        if: matrix.project == 'api'
+        run: docker build --pull -f apps/api/Dockerfile -t tunupa-api:security ./apps/api
+      - name: Build Web image for scanning
+        if: matrix.project == 'web'
+        run: >-
+          docker build --pull -f apps/web/Dockerfile
+          --build-arg NEXT_PUBLIC_API_URL=https://example.invalid/api/v1
+          -t tunupa-web:security ./apps/web
+      - name: Scan local image vulnerabilities (baseline)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: tunupa-${{ matrix.project }}:security
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          format: sarif
+          output: trivy-${{ matrix.project }}.sarif
+          exit-code: '0'
+      - name: Summarize image findings
+        run: >-
+          python3 scripts/ci/security_report.py sarif
+          trivy-${{ matrix.project }}.sarif 'Trivy image ${{ matrix.project }}'
+      - name: Save image report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: trivy-image-${{ matrix.project }}
+          path: trivy-${{ matrix.project }}.sarif
+          if-no-files-found: error
+          retention-days: 14
+      - name: Send image findings to GitHub Code Scanning
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
+        with:
+          sarif_file: trivy-${{ matrix.project }}.sarif
+          category: trivy-image-${{ matrix.project }}
+
+  codeql:
+    name: CodeQL - JavaScript / TypeScript
+    # Evitar fallos de permisos de subida en forks; siempre analizar main.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
+        with:
+          languages: javascript-typescript
+          build-mode: none
+          queries: security-extended
+      - name: Analyze code
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
+        with:
+          category: /language:javascript-typescript
+
+  dependency-review:
+    name: Dependency review - block newly vulnerable PR changes
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Block newly introduced high / critical vulnerabilities
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
