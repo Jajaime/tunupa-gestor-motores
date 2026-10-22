@@ -1,0 +1,16 @@
+# Overlay opcional de endurecimiento para API y Web de Tunupa.
+# Combinar SOLO con compose.yaml + compose.docker.yaml (o, en el futuro,
+# tambien compose.https.yaml). No modifica PostgreSQL, MQTT, Grafana o Caddy.
+services:
+  api:
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+  web:
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
