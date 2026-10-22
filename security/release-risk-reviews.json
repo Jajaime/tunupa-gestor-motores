@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "publication_authorized": false,
+  "purpose": "Borrador de revision; no es una excepcion ni aprobacion automatica.",
+  "reviews": [
+    {
+      "id": "CVE-2025-69720",
+      "source_package": "ncurses",
+      "status": "PENDING",
+      "risk_owner": "",
+      "approver": "",
+      "technical_justification": "",
+      "evidence_url": "",
+      "approved_at": "",
+      "review_by": ""
+    },
+    {
+      "id": "CVE-2026-16742",
+      "source_package": "systemd",
+      "status": "PENDING",
+      "risk_owner": "",
+      "approver": "",
+      "technical_justification": "",
+      "evidence_url": "",
+      "approved_at": "",
+      "review_by": ""
+    },
+    {
+      "id": "CVE-2026-54369",
+      "source_package": "acl",
+      "status": "PENDING",
+      "risk_owner": "",
+      "approver": "",
+      "technical_justification": "",
+      "evidence_url": "",
+      "approved_at": "",
+      "review_by": ""
+    },
+    {
+      "id": "CVE-2026-76642",
+      "source_package": "util-linux",
+      "status": "PENDING",
+      "risk_owner": "",
+      "approver": "",
+      "technical_justification": "",
+      "evidence_url": "",
+      "approved_at": "",
+      "review_by": ""
+    },
+    {
+      "id": "CVE-2026-78408",
+      "source_package": "util-linux",
+      "status": "PENDING",
+      "risk_owner": "",
+      "approver": "",
+      "technical_justification": "",
+      "evidence_url": "",
+      "approved_at": "",
+      "review_by": ""
+    },
+    {
+      "id": "CVE-2026-78409",
+      "source_package": "util-linux",
+      "status": "PENDING",
+      "risk_owner": "",
+      "approver": "",
+      "technical_justification": "",
+      "evidence_url": "",
+      "approved_at": "",
+      "review_by": ""
+    },
+    {
+      "id": "CVE-2026-78410",
+      "source_package": "util-linux",
+      "status": "PENDING",
+      "risk_owner": "",
+      "approver": "",
+      "technical_justification": "",
+      "evidence_url": "",
+      "approved_at": "",
+      "review_by": ""
+    },
+    {
+      "id": "CVE-2026-9538",
+      "source_package": "perl",
+      "status": "PENDING",
+      "risk_owner": "",
+      "approver": "",
+      "technical_justification": "",
+      "evidence_url": "",
+      "approved_at": "",
+      "review_by": ""
+    }
+  ]
+}

@@ -69,6 +69,10 @@ jobs:
           python3 scripts/ci/cve_risk_inventory.py
           security/pending-high-cves.json
           trivy-release-api.json trivy-release-web.json
+      - name: Summarize pending security approvals (informational; never authorizes publish)
+        run: >-
+          python3 scripts/ci/release_readiness.py --mode report
+          --api trivy-release-api.json --web trivy-release-web.json
       - name: Preserve candidate scan reports
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 (Node.js 24)
