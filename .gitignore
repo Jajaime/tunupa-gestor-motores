@@ -58,3 +58,8 @@ database/backups/*
 # Credenciales y ACL operativo de Mosquitto
 infrastructure/mosquitto/config/passwords
 infrastructure/mosquitto/config/acl
+
+# Python - archivos generados
+__pycache__/
+*.py[cod]
+.pytest_cache/

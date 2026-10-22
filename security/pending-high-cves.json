@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "status": "PENDING_REVIEW_NOT_APPROVED",
+  "reference_run": "https://github.com/Jajaime/tunupa-gestor-motores/actions/runs/39785331325",
+  "cves": [
+    {
+      "id": "CVE-2025-69720",
+      "source_package": "ncurses",
+      "assessment_needed": "Comprobar la presencia y eventual invocacion de infocmp; revisar input no confiable."
+    },
+    {
+      "id": "CVE-2026-16742",
+      "source_package": "systemd",
+      "assessment_needed": "Comprobar que systemd-homed no se ejecuta dentro de los contenedores."
+    },
+    {
+      "id": "CVE-2026-54369",
+      "source_package": "acl",
+      "assessment_needed": "Revisar el componente vulnerable, uso de libacl y condiciones de ataque."
+    },
+    {
+      "id": "CVE-2026-76642",
+      "source_package": "util-linux",
+      "assessment_needed": "Verificar montaje de sistemas de archivos, mount helpers y capacidades disponibles."
+    },
+    {
+      "id": "CVE-2026-78408",
+      "source_package": "util-linux",
+      "assessment_needed": "Revisar uso de nsenter y acceso a cgroup.procs dentro del contenedor."
+    },
+    {
+      "id": "CVE-2026-78409",
+      "source_package": "util-linux",
+      "assessment_needed": "Revisar opciones X-mount.subdir y permisos de montaje."
+    },
+    {
+      "id": "CVE-2026-78410",
+      "source_package": "util-linux",
+      "assessment_needed": "Revisar bind mounts restringidos y las capacidades efectivas."
+    },
+    {
+      "id": "CVE-2026-9538",
+      "source_package": "perl",
+      "assessment_needed": "Determinar si hay invocaciones de Perl en el runtime."
+    }
+  ]
+}
