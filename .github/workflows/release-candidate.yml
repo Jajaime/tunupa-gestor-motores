@@ -1,0 +1,76 @@
+name: Tunupa - Release Candidate Preflight (no publish)
+
+on:
+  workflow_dispatch:
+
+# Este workflow solo construye y analiza imagenes locales.
+# No requiere permisos para publicar paquetes, ni secretos, ni VPS.
+permissions:
+  contents: read
+
+concurrency:
+  group: tunupa-release-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    name: Build and assess release candidate (no push)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Audit all runtime npm dependencies (blocking)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for project in api web simulator; do
+            echo "Auditing production packages: $project"
+            (cd "apps/$project" && npm audit --omit=dev --audit-level=low)
+          done
+      - name: Build API runtime image (not pushed)
+        run: docker build --pull -f apps/api/Dockerfile -t tunupa-api:release-candidate ./apps/api
+      - name: Build Web runtime image (not pushed)
+        run: >-
+          docker build --pull -f apps/web/Dockerfile
+          --build-arg NEXT_PUBLIC_API_URL=https://example.invalid/api/v1
+          -t tunupa-web:release-candidate ./apps/web
+      - name: Scan API runtime image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: tunupa-api:release-candidate
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          format: json
+          output: trivy-release-api.json
+          exit-code: '0'
+      - name: Scan Web runtime image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: tunupa-web:release-candidate
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          format: json
+          output: trivy-release-web.json
+          exit-code: '0'
+      - name: Evaluate findings for release review
+        run: >-
+          python3 scripts/ci/release_scan_gate.py
+          trivy-release-api.json trivy-release-web.json
+      - name: Preserve candidate scan reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tunupa-release-candidate-trivy-${{ github.sha }}
+          path: |
+            trivy-release-api.json
+            trivy-release-web.json
+          if-no-files-found: error
+          retention-days: 14
