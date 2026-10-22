@@ -1,0 +1,17 @@
+# 18a5: overlay OPCIONAL de filesystem de solo lectura para API y Web.
+# Requiere compose.yaml + compose.docker.yaml + compose.hardening.yaml.
+# Agregarlo siempre AL FINAL de la cadena de archivos -f.
+# No modifica bases de datos, Mosquitto, Grafana ni Caddy.
+services:
+  api:
+    read_only: true
+    tmpfs:
+      # Node / librerias pueden necesitar archivos temporales en ejecucion.
+      - "/tmp:rw,nosuid,nodev,noexec,size=64m,uid=1000,gid=1000,mode=1777"
+  web:
+    read_only: true
+    tmpfs:
+      - "/tmp:rw,nosuid,nodev,noexec,size=64m,uid=1000,gid=1000,mode=1777"
+      # Next.js standalone puede escribir cache en .next/cache.
+      # Temporal: se pierde al recrear o detener el contenedor.
+      - "/app/.next/cache:rw,nosuid,nodev,noexec,size=128m,uid=1000,gid=1000,mode=0700"
