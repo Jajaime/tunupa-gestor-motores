@@ -40,6 +40,12 @@ jobs:
           docker build --pull -f apps/web/Dockerfile
           --build-arg NEXT_PUBLIC_API_URL=https://example.invalid/api/v1
           -t tunupa-web:release-candidate ./apps/web
+      - name: Record restricted runtime exposure for candidate images
+        run: >-
+          python3 scripts/security/inspect_runtime_exposure.py
+          --api-image tunupa-api:release-candidate
+          --web-image tunupa-web:release-candidate
+          --output runtime-exposure-release.md
       - name: Scan API runtime image with Trivy
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -60,6 +66,31 @@ jobs:
           format: json
           output: trivy-release-web.json
           exit-code: '0'
+      - name: Generate API CycloneDX SBOM (not published)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: tunupa-api:release-candidate
+          format: cyclonedx
+          output: sbom-release-api.cdx.json
+          exit-code: '0'
+      - name: Generate Web CycloneDX SBOM (not published)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: tunupa-web:release-candidate
+          format: cyclonedx
+          output: sbom-release-web.cdx.json
+          exit-code: '0'
+      - name: Validate image identity and prepare evidence manifest
+        run: >-
+          python3 scripts/ci/candidate_evidence.py
+          --api trivy-release-api.json
+          --web trivy-release-web.json
+          --api-sbom sbom-release-api.cdx.json
+          --web-sbom sbom-release-web.cdx.json
+          --runtime runtime-exposure-release.md
+          --output candidate-evidence.json
       - name: Evaluate findings for release review
         run: >-
           python3 scripts/ci/release_scan_gate.py
@@ -73,13 +104,17 @@ jobs:
         run: >-
           python3 scripts/ci/release_readiness.py --mode report
           --api trivy-release-api.json --web trivy-release-web.json
-      - name: Preserve candidate scan reports
+      - name: Preserve candidate assessments, image IDs and SBOMs
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 (Node.js 24)
         with:
-          name: tunupa-release-candidate-trivy-${{ github.sha }}
+          name: tunupa-release-candidate-evidence-${{ github.sha }}
           path: |
             trivy-release-api.json
             trivy-release-web.json
+            sbom-release-api.cdx.json
+            sbom-release-web.cdx.json
+            runtime-exposure-release.md
+            candidate-evidence.json
           if-no-files-found: error
           retention-days: 14
