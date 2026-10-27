@@ -38,11 +38,11 @@ jobs:
       - uses: actions/setup-node@v7.1.0
         with:
           node-version-file: .nvmrc
-      - name: Audit runtime dependencies (baseline, not a release gate)
+      - name: Audit runtime dependencies (fail on any runtime vulnerability)
         working-directory: ${{ matrix.path }}
         shell: bash
         run: |
-          # npm audit puede devolver 1 por vulnerabilidades; el resumen las hace visibles.
+          # npm audit puede devolver 1; el validador informa y falla por vulnerabilidades.
           # No utilizar secretos ni instalar dependencias para este informe.
           npm audit --omit=dev --json > "$RUNNER_TEMP/npm-audit-${{ matrix.project }}.json" || true
           python3 ../../scripts/ci/security_report.py npm \

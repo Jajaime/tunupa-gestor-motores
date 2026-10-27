@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Publica resúmenes seguros de npm audit / Trivy SARIF en GitHub Actions.
 
-No modifica el resultado de seguridad por vulnerabilidades conocidas (baseline).
-Un informe ausente, inválido o un error de auditoría sí hace fallar el job.
+npm audit de ejecución falla si registra vulnerabilidades. Trivy SARIF continúa
+como línea base informativa. Los informes inválidos también hacen fallar el job.
 """
 
 import json
@@ -38,12 +38,15 @@ def main() -> int:
             print("Resumen npm audit incompleto", file=sys.stderr)
             return 1
         total = counts.get("total", sum(counts[key] for key in keys))
+        if not isinstance(total, int) or total < 0:
+            print("Total de vulnerabilidades npm inválido", file=sys.stderr)
+            return 1
         lines = [
             f"### {title}",
             f"- Vulnerabilidades registradas: **{total}**",
             f"- Críticas: **{counts['critical']}**, altas: **{counts['high']}**, "
             f"moderadas: **{counts['moderate']}**, bajas: **{counts['low']}**",
-            "- **Línea base informativa**: un hallazgo existente todavía no bloquea este job.",
+            "- **Bloqueante**: cualquier vulnerabilidad npm de ejecución hace fallar el job.",
             "- Consultar el artefacto JSON para los paquetes y avisos concretos.",
         ]
     else:
@@ -68,7 +71,7 @@ def main() -> int:
     if summary_path:
         with open(summary_path, "a", encoding="utf-8") as summary:
             summary.write(message + "\n")
-    return 0
+    return 1 if kind == "npm" and total > 0 else 0
 
 
 if __name__ == "__main__":
