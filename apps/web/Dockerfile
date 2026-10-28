@@ -18,6 +18,7 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 COPY --from=build --chown=1000:1000 /app/.next/standalone ./
 COPY --from=build --chown=1000:1000 /app/.next/static ./.next/static
+COPY --from=build --chown=1000:1000 /app/public ./public
 USER 1000:1000
 EXPOSE 3000
 # ENTRYPOINT del runtime Distroless: /nodejs/bin/node (no shell).

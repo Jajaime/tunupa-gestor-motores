@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import Image from 'next/image';
 import { useLiveDashboard } from './use-live-dashboard';
 import type {
   LatestMeasurement,
@@ -90,8 +91,14 @@ export function Dashboard() {
     <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-mark">T</span>
-          <div><strong>Tunupa</strong><small>Gestor de motores</small></div>
+          <span className="brand-mark" aria-hidden="true">T</span>
+          <div className="brand-identity">
+            <span className="brand-logo-frame">
+              <Image src="/brand/groundtek-logo.png" alt="GroundTEK" width={298} height={40}
+                className="brand-logo" priority />
+            </span>
+            <small>Gestor de motores</small>
+          </div>
         </div>
         <nav aria-label="Navegación principal">
           <a className="nav-item active" href="#dashboard">Panel general</a>

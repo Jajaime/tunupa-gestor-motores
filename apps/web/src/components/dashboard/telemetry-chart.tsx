@@ -36,17 +36,17 @@ export function TelemetryChart({ data, unit }: TelemetryChartProps) {
     <div className="chart-container" aria-label="Gráfico histórico de telemetría">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 12, right: 12, left: -16, bottom: 0 }}>
-          <CartesianGrid stroke="#dfe5e2" strokeDasharray="4 4" vertical={false} />
+          <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="4 4" vertical={false} />
           <XAxis
             dataKey="measuredAt"
             tickFormatter={formatTime}
             minTickGap={36}
-            stroke="#77827d"
+            stroke="var(--chart-axis)"
             tickLine={false}
             axisLine={false}
           />
           <YAxis
-            stroke="#77827d"
+            stroke="var(--chart-axis)"
             tickLine={false}
             axisLine={false}
             width={54}
@@ -59,15 +59,22 @@ export function TelemetryChart({ data, unit }: TelemetryChartProps) {
               }).format(new Date(String(value)))
             }
             formatter={(value) => [`${Number(value).toFixed(2)} ${unit ?? ''}`, 'Valor']}
-            contentStyle={{ borderRadius: 12, borderColor: '#dfe5e2' }}
+            contentStyle={{
+              borderRadius: 12,
+              borderColor: 'var(--line)',
+              backgroundColor: 'var(--surface-raised)',
+              color: 'var(--ink)',
+            }}
+            labelStyle={{ color: 'var(--ink)' }}
+            itemStyle={{ color: 'var(--ink)' }}
           />
           <Line
             type="monotone"
             dataKey="value"
-            stroke="#13795b"
+            stroke="var(--brand)"
             strokeWidth={3}
             dot={false}
-            activeDot={{ r: 5, fill: '#f2a93b', strokeWidth: 0 }}
+            activeDot={{ r: 5, fill: 'var(--brand-hover)', strokeWidth: 0 }}
           />
         </LineChart>
       </ResponsiveContainer>

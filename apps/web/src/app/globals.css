@@ -1,13 +1,17 @@
 :root {
-  --ink: #17211d;
-  --muted: #68736e;
-  --line: #dfe5e2;
+  --ink: #302923;
+  --muted: #716a64;
+  --line: #e4ddd5;
   --surface: #ffffff;
-  --canvas: #f3f5f2;
+  --canvas: #f8f6f3;
   --green: #13795b;
   --green-soft: #e3f3ed;
   --amber: #d98216;
   --red: #c4473a;
+  --brand: #a65e2e;
+  --brand-hover: #88471f;
+  --brand-soft: #faeee4;
+  --brand-graphite: #525252;
 }
 
 * { box-sizing: border-box; }
@@ -17,7 +21,7 @@ button, select { font: inherit; }
 button { color: inherit; }
 
 .app-shell { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
-.sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 28px 20px; color: #eef7f2; background: #122a22; }
+.sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 28px 20px; color: #eef7f2; background: #22242a; }
 .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 28px; }
 .brand-mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; color: #17211d; background: #f2a93b; font-size: 22px; font-weight: 900; }
 .brand strong, .brand small { display: block; }
@@ -153,3 +157,199 @@ nav { display: grid; gap: 8px; }
 .realtime-connected { color: #15803d; }
 .realtime-reconnecting { color: #b45309; }
 .realtime-disconnected { color: #b91c1c; }
+
+/* GroundTEK: identidad visual (solo presentación; estados de seguridad intactos). */
+.sidebar {
+  background: #22242a;
+  color: #f8f4ee;
+}
+.brand-mark {
+  color: #ffffff;
+  background: var(--brand);
+}
+.brand small { color: #cfc2b7; }
+.nav-item { color: #d8d2cb; }
+.nav-item:hover, .nav-item.active {
+  color: #ffffff;
+  background: var(--brand);
+}
+.sidebar-footer { border-top-color: #55504c; color: #e8e0d8; }
+.sidebar-footer small { color: #bbb0a6; }
+.topbar h1, .summary-grid strong, .panel-heading h2,
+.section-heading h2, .measurement-value, .auth-card h1 {
+  color: #332b26;
+}
+.eyebrow, .quality-good { color: var(--brand); }
+.refresh-button, .chart-heading select, .auth-card input {
+  border-color: #cfc5ba;
+}
+.refresh-button:hover {
+  color: var(--brand);
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+.motor-row:hover, .motor-row.selected { background: #fcf4eb; }
+.motor-row.selected { box-shadow: inset 3px 0 var(--brand); }
+.measurement-icon {
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+.auth-card { box-shadow: 0 16px 56px rgba(82, 82, 82, .10); }
+.auth-submit { background: var(--brand); }
+.auth-submit:hover { background: var(--brand-hover); }
+.auth-card input:focus-visible, .auth-submit:focus-visible,
+.refresh-button:focus-visible, .nav-item:focus-visible,
+.chart-heading select:focus-visible, .motor-row:focus-visible {
+  outline: 3px solid #b96e25;
+  outline-offset: 3px;
+}
+/* Mantener colores diferenciados para conexión, advertencia y fallas. */
+.realtime-connected { color: #15803d; }
+.realtime-reconnecting { color: #b45309; }
+.realtime-disconnected { color: #b91c1c; }
+
+/* GroundTEK: logotipo proporcional en login y menú lateral. */
+.auth-brand .auth-logo {
+  display: block;
+  width: min(100%, 298px);
+  height: auto;
+}
+.sidebar .brand-mark { display: none; }
+.brand-identity { width: 100%; min-width: 0; }
+.brand-logo-frame {
+  display: block;
+  width: 100%;
+  padding: 8px 9px;
+  border-radius: 9px;
+  background: #fff;
+}
+.brand-logo { display: block; width: 100%; height: auto; }
+.brand-identity small { margin-top: 9px; }
+
+/* El menú compacto conserva el monograma original. */
+@media (max-width: 1100px) {
+  .sidebar .brand-mark { display: grid; }
+  .sidebar .brand-identity { display: none; }
+}
+
+/* GroundTEK V3: modo oscuro fijo; #22242a es el fondo del sidebar. */
+:root {
+  color-scheme: dark;
+  --ink: #f2f3f6;
+  --muted: #b7bbc5;
+  --line: #444852;
+  --surface: #292c33;
+  --surface-raised: #323640;
+  --canvas: #1a1c21;
+  --brand: #e0a777;
+  --brand-hover: #f0b98d;
+  --brand-soft: #40352f;
+  --brand-button: #9e592d;
+  --green: #83dbaf;
+  --green-soft: #233d31;
+  --amber: #ffcb78;
+  --red: #ff8580;
+  --chart-grid: #444852;
+  --chart-axis: #b2bac5;
+}
+
+/* Superficies y estructura. */
+body { color: var(--ink); background: var(--canvas); }
+.sidebar {
+  color: var(--ink);
+  background: #22242a;
+  border-right: 1px solid #393d46;
+}
+.brand small, .brand-identity small { color: #c5c7ce; }
+.nav-item { color: #d1d4db; }
+.nav-item:hover { color: #fff; background: #353841; }
+.nav-item.active { color: #fff; background: #49372f; }
+.sidebar-footer { color: #e1e2e7; border-top-color: #424650; }
+.sidebar-footer small { color: #b5bac5; }
+.brand-mark { color: #fff; background: var(--brand-button); }
+.summary-grid article, .panel, .measurement-card, .auth-card {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+}
+.panel-heading { border-bottom-color: var(--line); }
+.topbar h1, .summary-grid strong, .panel-heading h2,
+.section-heading h2, .measurement-value, .auth-card h1 {
+  color: var(--ink);
+}
+.eyebrow { color: var(--brand); }
+.quality-good { color: var(--green); }
+.quality-uncertain { color: var(--amber); }
+
+/* Listado de motores, selección y mediciones. */
+.motor-row {
+  color: var(--ink);
+  background: var(--surface);
+  border-bottom-color: var(--line);
+}
+.motor-row:hover, .motor-row.selected { background: #353039; }
+.motor-row.selected { box-shadow: inset 3px 0 var(--brand); }
+.status-pill { color: #d2d6dd; background: #3b404a; }
+.status-pill.online { color: #97e7bd; background: #214133; }
+.status-pill.warning { color: #ffce82; background: #4d3b25; }
+.status-pill.critical { color: #ffa39d; background: #4b2b30; }
+.status-beacon.online { background: #5ecb91; box-shadow: 0 0 0 4px #264136; }
+.status-beacon.warning { background: var(--amber); }
+.status-beacon.critical { background: var(--red); }
+.measurement-icon { color: var(--brand); background: var(--brand-soft); }
+.text-alert, .alarm-count.has-alarm { color: var(--red); }
+
+/* Controles, formulario de acceso y logo corporativo. */
+.refresh-button, .error-banner button, .chart-heading select,
+.auth-card input {
+  color: var(--ink);
+  background: var(--surface-raised);
+  border-color: #5b606a;
+}
+.auth-card input { caret-color: var(--brand); }
+.auth-card input::placeholder { color: #b5bac5; }
+.refresh-button:hover, .error-banner button:hover {
+  color: #fff;
+  background: #47404a;
+  border-color: var(--brand);
+}
+.auth-submit { color: #fff; background: var(--brand-button); }
+.auth-submit:hover { background: #a96335; }
+.auth-card { box-shadow: 0 18px 54px rgba(0, 0, 0, .3); }
+/* El PNG original tiene letras oscuras: conservar un fondo claro tras el logo. */
+.auth-brand {
+  width: fit-content;
+  max-width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d8d8dc;
+  border-radius: 12px;
+  background: #f8f8fa;
+}
+.brand-logo-frame { background: #f8f8fa; }
+.auth-card input:focus-visible, .auth-submit:focus-visible,
+.refresh-button:focus-visible, .nav-item:focus-visible,
+.chart-heading select:focus-visible, .motor-row:focus-visible {
+  outline-color: #f1b988;
+}
+
+/* Mensajes operativos: mantener la semántica y el contraste. */
+.telemetry-notice {
+  color: #ffdc9b;
+  background: #403324;
+  border-color: #85613b;
+}
+.error-banner, .auth-error {
+  color: #ffb3ab;
+  background: #452b30;
+  border-color: #8f464a;
+}
+.live-dot { background: #65d19a; }
+.live-dot.connecting { background: #ffcc7c; }
+.live-dot.disconnected { background: #ff8580; }
+.realtime-status { color: var(--muted); }
+.realtime-connected { color: #89dfad; }
+.realtime-reconnecting { color: #ffcf80; }
+.realtime-disconnected { color: #ffa39d; }
+
+/* Los componentes Recharts reciben sus colores de estas variables. */
+.chart-heading select { background: var(--surface-raised); }

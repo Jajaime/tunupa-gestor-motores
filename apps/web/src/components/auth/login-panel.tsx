@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAuth } from './auth-provider';
 
 export function LoginPanel() {
@@ -38,7 +39,10 @@ export function LoginPanel() {
   return (
     <main className="auth-screen">
       <section className="auth-card" aria-labelledby="login-title">
-        <div className="auth-brand"><span className="brand-mark">T</span><strong>Tunupa</strong></div>
+        <div className="auth-brand">
+          <Image src="/brand/groundtek-logo.png" alt="GroundTEK" width={298} height={40}
+            className="auth-logo" priority />
+        </div>
         <span className="eyebrow">GESTOR DE MOTORES</span>
         <h1 id="login-title">Inicia sesión</h1>
         <p>Accede al monitoreo de motores y consulta su condición.</p>
