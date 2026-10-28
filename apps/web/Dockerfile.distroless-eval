@@ -1,0 +1,23 @@
+# 18c2 SOLO EXPERIMENTO: no sustituye apps/web/Dockerfile de produccion.
+FROM node:24-trixie-slim AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY . .
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN test -n "$NEXT_PUBLIC_API_URL" && npm run build
+
+FROM gcr.io/distroless/nodejs24-debian13:nonroot AS runner
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+WORKDIR /app
+COPY --from=build --chown=1000:1000 /app/.next/standalone ./
+COPY --from=build --chown=1000:1000 /app/.next/static ./.next/static
+USER 1000:1000
+EXPOSE 3000
+# La imagen distroless ya define ENTRYPOINT a Node.js.
+CMD ["server.js"]

@@ -1,0 +1,149 @@
+name: Tunupa - Distroless Runtime Evaluation (no publish)
+
+on:
+  workflow_dispatch:
+
+# 18c2: comparacion reproducible. No se publica ni despliega ninguna imagen.
+permissions:
+  contents: read
+
+concurrency:
+  group: tunupa-distroless-eval-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    name: Compare Debian and Distroless runtime images (no push)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Runtime npm audit (blocking)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for service in api web; do
+            (cd "apps/$service" && npm audit --omit=dev --audit-level=low)
+          done
+
+      - name: Build original Debian images (comparison baseline)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build --pull -f apps/api/Dockerfile -t tunupa-api:debian-eval ./apps/api
+          docker build --pull -f apps/web/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL=https://example.invalid/api/v1 \
+            -t tunupa-web:debian-eval ./apps/web
+
+      - name: Build experimental Distroless images (not production)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build --pull -f apps/api/Dockerfile.distroless-eval \
+            -t tunupa-api:distroless-eval ./apps/api
+          docker build --pull -f apps/web/Dockerfile.distroless-eval \
+            --build-arg NEXT_PUBLIC_API_URL=https://example.invalid/api/v1 \
+            -t tunupa-web:distroless-eval ./apps/web
+
+      - name: Smoke test native argon2 within restricted Distroless API
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --pull=never --network none --read-only \
+            --cap-drop ALL --security-opt no-new-privileges:true \
+            --pids-limit 256 --memory 768m \
+            --tmpfs /tmp:rw,nosuid,nodev,noexec,size=64m,uid=1000,gid=1000,mode=1777 \
+            --entrypoint /nodejs/bin/node tunupa-api:distroless-eval \
+            -e 'const a=require("argon2");a.hash("tunupa-smoke").then(h=>a.verify(h,"tunupa-smoke")).then(ok=>{if(!ok)process.exitCode=1;else console.log("argon2 OK")}).catch(e=>{console.error(e.message);process.exitCode=1})'
+
+      - name: Smoke test Next.js on isolated Distroless Web
+        shell: bash
+        run: |
+          set -euo pipefail
+          # El contenedor arranca sin red externa y solo consulta su loopback.
+          # Verifica la pagina HTTP; NO prueba la conexion real al backend.
+          docker run --rm --pull=never --network none --read-only \
+            --cap-drop ALL --security-opt no-new-privileges:true \
+            --pids-limit 256 --memory 768m \
+            --tmpfs /tmp:rw,nosuid,nodev,noexec,size=64m,uid=1000,gid=1000,mode=1777 \
+            --tmpfs /app/.next/cache:rw,nosuid,nodev,noexec,size=128m,uid=1000,gid=1000,mode=0700 \
+            -e NODE_ENV=production -e PORT=3000 -e HOSTNAME=127.0.0.1 \
+            --entrypoint /nodejs/bin/node tunupa-web:distroless-eval \
+            -e 'require("./server.js"); (async()=>{for(let i=0;i<25;i++){try{const r=await fetch("http://127.0.0.1:3000/");if(r.ok){console.log("Next.js OK: "+r.status);process.exit(0)}else{console.error("HTTP "+r.status);process.exit(1)}}catch{} await new Promise(done=>setTimeout(done,400))}console.error("Next.js no responde");process.exit(1)})().catch(e=>{console.error(e.message);process.exit(1)})'
+
+      - name: Record image IDs and non-secret runtime metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          for image in tunupa-api:debian-eval tunupa-api:distroless-eval \
+                       tunupa-web:debian-eval tunupa-web:distroless-eval; do
+            echo "$image"
+            docker image inspect --format 'ID={{.Id}} USER={{.Config.User}} ENTRYPOINT={{json .Config.Entrypoint}}' "$image"
+          done
+
+      - name: Trivy Debian API
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: tunupa-api:debian-eval
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          format: json
+          output: trivy-api-debian.json
+          exit-code: '0'
+
+      - name: Trivy Distroless API
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: tunupa-api:distroless-eval
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          format: json
+          output: trivy-api-distroless.json
+          exit-code: '0'
+
+      - name: Trivy Debian Web
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: tunupa-web:debian-eval
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          format: json
+          output: trivy-web-debian.json
+          exit-code: '0'
+
+      - name: Trivy Distroless Web
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: tunupa-web:distroless-eval
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          format: json
+          output: trivy-web-distroless.json
+          exit-code: '0'
+
+      - name: Compare observed CVEs (informational; never authorizes publish)
+        run: >-
+          python3 scripts/ci/compare_runtime_image_cves.py
+          trivy-api-debian.json trivy-api-distroless.json
+          trivy-web-debian.json trivy-web-distroless.json
+
+      - name: Preserve Trivy comparison reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tunupa-distroless-evaluation-${{ github.sha }}
+          path: |
+            trivy-api-debian.json
+            trivy-api-distroless.json
+            trivy-web-debian.json
+            trivy-web-distroless.json
+          if-no-files-found: warn
+          retention-days: 14
