@@ -1,0 +1,33 @@
+# 18c3: overlay SOLO para ensayo funcional LOCAL de Distroless.
+# No publicar ni desplegar estas imagenes. Combinar al final con:
+# compose.yaml, compose.docker.yaml, compose.hardening.yaml,
+# compose.readonly.yaml y compose.resources.yaml.
+# Mantener tags diferentes de tunupa-api:local y tunupa-web:local para
+# facilitar la reversion sin reemplazar las imagenes Debian existentes.
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile.distroless-eval
+    image: tunupa-api:distroless-local-eval
+    # Distroless NO incluye el ejecutable "node" en el PATH tradicional.
+    # El runtime oficial lo expone en /nodejs/bin/node.
+    healthcheck:
+      test:
+        - CMD
+        - /nodejs/bin/node
+        - -e
+        - "fetch('http://127.0.0.1:3002/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile.distroless-eval
+      args:
+        NEXT_PUBLIC_API_URL: "${WEB_ORIGIN:?Definir WEB_ORIGIN en .env}/api/v1"
+    image: tunupa-web:distroless-local-eval
+    healthcheck:
+      test:
+        - CMD
+        - /nodejs/bin/node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
