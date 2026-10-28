@@ -1,0 +1,10 @@
+# 18b5: limite de RAM para API y Web en pruebas locales. OPCIONAL.
+# Aplicar al final de compose.yaml + compose.docker.yaml +
+# compose.hardening.yaml + compose.readonly.yaml.
+# No se impone memswap_limit: el comportamiento de swap depende del host.
+# Validar bajo telemetria, login, WebSocket y consultas historicas.
+services:
+  api:
+    mem_limit: 768m
+  web:
+    mem_limit: 768m
