@@ -1,4 +1,8 @@
+'use client';
+
 import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import type { ApiConnection } from '@/lib/dashboard-status';
 import { connectionLabel } from '@/lib/dashboard-status';
 import { getSidebarItems } from '@/lib/sidebar-navigation';
@@ -6,11 +10,12 @@ import type { AuthUser } from '@/lib/types';
 
 type SidebarProps = {
   role: AuthUser['role'] | undefined;
-  apiConnection: ApiConnection;
-  lastRefresh: Date | null;
+  apiConnection?: ApiConnection;
+  lastRefresh?: Date | null;
 };
 
 export function AppSidebar({ role, apiConnection, lastRefresh }: SidebarProps) {
+  const pathname = usePathname();
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -24,28 +29,42 @@ export function AppSidebar({ role, apiConnection, lastRefresh }: SidebarProps) {
         </div>
       </div>
       <nav aria-label="Navegación principal">
-        {getSidebarItems(role).map((item) => (
-          <a key={item.id} className="nav-item active" href={item.href}
-            aria-current="page" title={item.label}>
-            <svg className="nav-item-icon" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
-              strokeLinejoin="round" aria-hidden="true">
-              <rect x="3" y="3" width="7" height="7" rx="1.3" />
-              <rect x="14" y="3" width="7" height="7" rx="1.3" />
-              <rect x="3" y="14" width="7" height="7" rx="1.3" />
-              <rect x="14" y="14" width="7" height="7" rx="1.3" />
-            </svg>
-            <span className="nav-item-label">{item.label}</span>
-          </a>
-        ))}
+        {getSidebarItems(role).map((item) => {
+          const active = pathname === item.href;
+          return (
+            <Link key={item.id} className={`nav-item${active ? ' active' : ''}`} href={item.href}
+              aria-current={active ? 'page' : undefined} title={item.label}>
+              <svg className="nav-item-icon" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+                strokeLinejoin="round" aria-hidden="true">
+                {item.id === 'clients' ? (
+                  <>
+                    <rect x="3" y="8" width="18" height="13" rx="2" />
+                    <path d="M7 8V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3M3 14h18" />
+                  </>
+                ) : (
+                  <>
+                    <rect x="3" y="3" width="7" height="7" rx="1.3" />
+                    <rect x="14" y="3" width="7" height="7" rx="1.3" />
+                    <rect x="3" y="14" width="7" height="7" rx="1.3" />
+                    <rect x="14" y="14" width="7" height="7" rx="1.3" />
+                  </>
+                )}
+              </svg>
+              <span className="nav-item-label">{item.label}</span>
+            </Link>
+          );
+        })}
       </nav>
-      <div className="sidebar-footer">
-        <span className={`live-dot ${apiConnection}`} aria-hidden="true" />
-        <span role="status">{connectionLabel(apiConnection)}</span>
-        <small>{lastRefresh
-          ? `Última consulta correcta ${lastRefresh.toLocaleTimeString('es-CL')}`
-          : 'Sin consulta correcta todavía'}</small>
-      </div>
+      {apiConnection && (
+        <div className="sidebar-footer">
+          <span className={`live-dot ${apiConnection}`} aria-hidden="true" />
+          <span role="status">{connectionLabel(apiConnection)}</span>
+          <small>{lastRefresh
+            ? `Última consulta correcta ${lastRefresh.toLocaleTimeString('es-CL')}`
+            : 'Sin consulta correcta todavía'}</small>
+        </div>
+      )}
     </aside>
   );
 }

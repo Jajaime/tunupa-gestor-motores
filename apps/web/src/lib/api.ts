@@ -37,7 +37,8 @@ async function read<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const messages: Record<number, string> = {
       401: 'La sesión expiró. Inicia sesión nuevamente.',
-      403: 'La solicitud no fue autorizada. Intenta nuevamente.',
+      403: 'No tienes permisos para realizar esta operación.',
+      409: 'El registro ya existe o entra en conflicto con los datos actuales.',
       429: 'Demasiados intentos. Espera un minuto antes de volver a intentar.',
     };
     throw new ApiError(response.status, messages[response.status] ?? 'No fue posible completar la solicitud.');
@@ -177,6 +178,87 @@ export async function logout(): Promise<void> {
 
 export async function getCurrentUser(): Promise<AuthUser> {
   return (await request<{ user: AuthUser }>('/auth/me')).user;
+}
+
+// Mutaciones administrativas: misma protección de sesión, refresh y CSRF que login/logout.
+async function mutate<T>(path: string, payload: unknown): Promise<T> {
+  const version = sessionVersion;
+  const revision = refreshRevision;
+  try {
+    assertSession(version);
+    let response = await postAuth(path, payload);
+    assertSession(version);
+    if (response.status === 401) {
+      if (revision === refreshRevision) await refreshSession();
+      assertSession(version);
+      response = await postAuth(path, payload);
+      assertSession(version);
+    }
+    return await read<T>(response);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401
+      && version === sessionVersion && !loggingOut && typeof window !== 'undefined') {
+      window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+    }
+    throw error;
+  }
+}
+
+export interface AdminClientSummary {
+  id: string;
+  name: string;
+  taxId: string | null;
+  email: string | null;
+  phone: string | null;
+  status: 'ACTIVE' | 'INACTIVE';
+  plantCount: number;
+  motorCount: number;
+}
+export interface AdminPlant {
+  id: string;
+  name: string;
+  code: string;
+  location: string | null;
+  status: string;
+  motorCount: number;
+}
+export interface AdminMotor {
+  id: string;
+  plantId: string;
+  name: string;
+  code: string;
+  status: string;
+  operationalStatus: string;
+  lastTelemetryAt: string | null;
+}
+export interface AdminClientDetail {
+  client: AdminClientSummary;
+  plants: AdminPlant[];
+  motors: AdminMotor[];
+}
+export type CreateAdminClient = {
+  name: string;
+  taxId?: string;
+  email?: string;
+  phone?: string;
+};
+export type CreateAdminPlant = {
+  name: string;
+  code: string;
+  location?: string;
+};
+
+export function getAdminClients(): Promise<AdminClientSummary[]> {
+  return request<AdminClientSummary[]>('/admin/clients');
+}
+export function getAdminClient(id: string): Promise<AdminClientDetail> {
+  return request<AdminClientDetail>(`/admin/clients/${encodeURIComponent(id)}`);
+}
+export function createAdminClient(data: CreateAdminClient): Promise<AdminClientSummary> {
+  return mutate<AdminClientSummary>('/admin/clients', data);
+}
+export function createAdminPlant(clientId: string, data: CreateAdminPlant): Promise<AdminPlant> {
+  return mutate<AdminPlant>(`/admin/clients/${encodeURIComponent(clientId)}/plants`, data);
 }
 
 export function getDashboardMotors(): Promise<DashboardMotorSummary[]> {

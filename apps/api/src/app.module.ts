@@ -12,6 +12,7 @@ import { MotorsModule } from './motors/motors.module';
 import { MqttModule } from './mqtt/mqtt.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { AuthModule } from './auth/auth.module';
+import { ClientsAdminModule } from './clients-admin/clients-admin.module';
 import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { CsrfGuard } from './auth/guards/csrf.guard';
 
@@ -79,6 +80,7 @@ import { CsrfGuard } from './auth/guards/csrf.guard';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
     AuthModule,
     RealtimeModule,
+    ClientsAdminModule,
   ],
   controllers: [AppController],
   providers: [

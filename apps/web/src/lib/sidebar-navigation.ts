@@ -1,17 +1,20 @@
 import type { AuthUser } from './types';
 
 export interface SidebarItem {
-  id: 'dashboard';
-  href: '#dashboard';
+  id: 'dashboard' | 'clients';
+  href: '/' | '/admin/clients';
   label: string;
 }
 
-// Solo publicar accesos con funcionalidad real. Los módulos siguientes
-// ampliarán este registro cuando tengan ruta y autorización implementadas.
+// Publicar solo rutas implementadas; restringir la administración por rol.
 export function getSidebarItems(role: AuthUser['role'] | undefined): SidebarItem[] {
-  return [{
+  const items: SidebarItem[] = [{
     id: 'dashboard',
-    href: '#dashboard',
+    href: '/',
     label: role === 'ADMIN' ? 'Panel general — Admin' : 'Panel general',
   }];
+  if (role === 'ADMIN') {
+    items.push({ id: 'clients', href: '/admin/clients', label: 'Clientes' });
+  }
+  return items;
 }
