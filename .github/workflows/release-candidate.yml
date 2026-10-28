@@ -40,11 +40,10 @@ jobs:
           docker build --pull -f apps/web/Dockerfile
           --build-arg NEXT_PUBLIC_API_URL=https://example.invalid/api/v1
           -t tunupa-web:release-candidate ./apps/web
-      - name: Record restricted runtime exposure for candidate images
+      # Distroless no incluye /bin/sh ni dpkg-query. Usar Node aislado.
+      - name: Inspect Distroless candidate images without shell
         run: >-
-          python3 scripts/security/inspect_runtime_exposure.py
-          --api-image tunupa-api:release-candidate
-          --web-image tunupa-web:release-candidate
+          python3 scripts/security/inspect_distroless_candidate.py
           --output runtime-exposure-release.md
       - name: Scan API runtime image with Trivy
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
@@ -104,6 +103,12 @@ jobs:
         run: >-
           python3 scripts/ci/release_readiness.py --mode report
           --api trivy-release-api.json --web trivy-release-web.json
+      - name: Explicitly block publishing this non-deployable candidate
+        shell: bash
+        run: |
+          echo '### NO AUTORIZADO PARA GHCR' >> "$GITHUB_STEP_SUMMARY"
+          echo 'La Web se compilo con example.invalid; no publicar ni desplegar este candidato.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Las CVE historicas permanecen documentadas; el escaneo actual no equivale a aprobacion de riesgos.' >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve candidate assessments, image IDs and SBOMs
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 (Node.js 24)

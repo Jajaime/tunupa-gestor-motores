@@ -1,0 +1,28 @@
+# 18c5: rollback manual exclusivo de API y Web a Dockerfiles Debian anteriores.
+# Aplicar AL FINAL despues de compose.yaml, compose.docker.yaml y overlays.
+# Nunca hacer docker compose down -v; mantiene DB/MQTT/Grafana/Caddy.
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile.debian-rollback
+    image: tunupa-api:debian-rollback-local
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3002/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile.debian-rollback
+      args:
+        NEXT_PUBLIC_API_URL: "${WEB_ORIGIN:?Definir WEB_ORIGIN en .env}/api/v1"
+    image: tunupa-web:debian-rollback-local
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"

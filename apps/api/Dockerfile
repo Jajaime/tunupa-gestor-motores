@@ -1,4 +1,4 @@
-# Contexto de build: ./apps/api. Node 24 y Debian para argon2 nativo.
+# Tunupa API: build sobre Debian/glibc para argon2; runtime minimo Distroless.
 FROM node:24-trixie-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -7,18 +7,19 @@ COPY nest-cli.json tsconfig.json tsconfig.build.json ./
 COPY src ./src
 RUN npm run build
 
-FROM node:24-trixie-slim AS runner
-ENV NODE_ENV=production
+FROM node:24-trixie-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-# argon2 necesita su modulo nativo: no desactivar scripts de instalacion.
-# npm solo se usa para instalar dependencias: no es necesario en ejecucion.
-# Retirar npm global evita incluir sus dependencias CLI en la imagen final.
-RUN npm ci --omit=dev --no-audit --no-fund \
-    && npm cache clean --force \
-    && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
-    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
-COPY --from=build --chown=node:node /app/dist ./dist
-USER node
+# argon2 requiere scripts de instalacion y sus bindings nativos.
+RUN npm ci --omit=dev --no-audit --no-fund
+
+FROM gcr.io/distroless/nodejs24-debian13:nonroot AS runner
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=deps --chown=1000:1000 /app/package.json ./package.json
+COPY --from=deps --chown=1000:1000 /app/node_modules ./node_modules
+COPY --from=build --chown=1000:1000 /app/dist ./dist
+USER 1000:1000
 EXPOSE 3002
-CMD ["node", "dist/main.js"]
+# ENTRYPOINT del runtime Distroless: /nodejs/bin/node (no shell).
+CMD ["dist/main.js"]
