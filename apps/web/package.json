@@ -8,11 +8,12 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "npm run typecheck && npm run test:auth && npm run test:dashboard && npm run test:realtime && npm run test:updates",
+    "test": "npm run typecheck && npm run test:auth && npm run test:dashboard && npm run test:realtime && npm run test:updates && npm run test:navigation",
     "test:auth": "node --test tests/auth-api.test.mjs",
     "test:dashboard": "node --test tests/dashboard-status.test.mjs",
     "test:realtime": "node --test tests/realtime-session.test.mjs",
-    "test:updates": "node --test tests/live-updates.test.mjs"
+    "test:updates": "node --test tests/live-updates.test.mjs",
+    "test:navigation": "node --test tests/sidebar-navigation.test.mjs"
   },
   "dependencies": {
     "next": "16.4.3",

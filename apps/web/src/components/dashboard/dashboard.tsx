@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import Image from 'next/image';
+import { AppSidebar } from '@/components/layout/app-sidebar';
 import { useLiveDashboard } from './use-live-dashboard';
 import type {
   LatestMeasurement,
@@ -9,7 +9,7 @@ import type {
 import { RealtimeStatus } from './realtime-status';
 import { TelemetryChart } from './telemetry-chart';
 import { useAuth } from '@/components/auth/auth-provider';
-import { connectionLabel, summarizeMotorStates } from '@/lib/dashboard-status';
+import { summarizeMotorStates } from '@/lib/dashboard-status';
 
 
 const measurements = [
@@ -89,30 +89,7 @@ export function Dashboard() {
 
   return (
     <main className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <span className="brand-mark" aria-hidden="true">T</span>
-          <div className="brand-identity">
-            <span className="brand-logo-frame">
-              <Image src="/brand/groundtek-logo.png" alt="GroundTEK" width={298} height={40}
-                className="brand-logo" priority />
-            </span>
-            <small>Gestor de motores</small>
-          </div>
-        </div>
-        <nav aria-label="Navegación principal">
-          <a className="nav-item active" href="#dashboard">Panel general</a>
-          <a className="nav-item" href="#motors">Motores</a>
-          <a className="nav-item" href="#history">Histórico</a>
-        </nav>
-        <div className="sidebar-footer">
-          <span className={`live-dot ${apiConnection}`} aria-hidden="true" />
-          <span role="status">{connectionLabel(apiConnection)}</span>
-          <small>{lastRefresh
-            ? `Última consulta correcta ${lastRefresh.toLocaleTimeString('es-CL')}`
-            : 'Sin consulta correcta todavía'}</small>
-        </div>
-      </aside>
+      <AppSidebar role={user?.role} apiConnection={apiConnection} lastRefresh={lastRefresh} />
 
       <section className="content" id="dashboard">
         <header className="topbar">

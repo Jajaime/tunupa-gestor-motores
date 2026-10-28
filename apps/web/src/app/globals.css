@@ -353,3 +353,12 @@ body { color: var(--ink); background: var(--canvas); }
 
 /* Los componentes Recharts reciben sus colores de estas variables. */
 .chart-heading select { background: var(--surface-raised); }
+
+/* Navegación modular: etiqueta completa y acceso compacto con ícono. */
+.nav-item { display: flex; align-items: center; gap: 10px; }
+.nav-item-icon { width: 18px; height: 18px; flex: 0 0 18px; }
+.nav-item-label { min-width: 0; }
+@media (min-width: 761px) and (max-width: 1100px) {
+  .nav-item { justify-content: center; padding: 12px 8px; font-size: 14px; }
+  .nav-item-label { display: none; }
+}
