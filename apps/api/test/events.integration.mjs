@@ -28,6 +28,7 @@ const { AuthSession } = require('../dist/auth/entities/auth-session.entity');
 const { AccessTokenGuard } = require('../dist/auth/guards/access-token.guard');
 const { CsrfGuard } = require('../dist/auth/guards/csrf.guard');
 const { DashboardGateway } = require('../dist/realtime/dashboard.gateway');
+const { TenantAccessService } = require('../dist/tenant-access/tenant-access.service');
 const { RealtimeAdapter } = require('../dist/realtime/realtime.adapter');
 const {
   DashboardController,
@@ -146,6 +147,7 @@ test(
           { provide: AuthService, useValue: auth },
           { provide: ConfigService, useValue: settings },
           { provide: SessionAccessService, useValue: sessions },
+          { provide: TenantAccessService, useValue: new TenantAccessService(db) },
           DashboardGateway,
           { provide: DashboardService, useValue: new DashboardService(db) },
           {
