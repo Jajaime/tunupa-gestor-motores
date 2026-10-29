@@ -3,7 +3,11 @@ import type { ExecutionContext } from '@nestjs/common';
 import { AdminOnlyGuard } from './admin-only.guard';
 
 function context(role?: string): ExecutionContext {
-  return { switchToHttp: () => ({ getRequest: () => ({ user: role ? { role } : undefined }) }) } as unknown as ExecutionContext;
+  return {
+    switchToHttp: () => ({
+      getRequest: () => ({ user: role ? { role } : undefined }),
+    }),
+  } as unknown as ExecutionContext;
 }
 
 describe('AdminOnlyGuard', () => {

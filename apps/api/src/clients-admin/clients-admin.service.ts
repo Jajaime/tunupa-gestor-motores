@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import * as argon2 from 'argon2';
 import { CreateClientUserDto } from './dto/create-client-user.dto';
@@ -68,7 +73,8 @@ export class ClientsAdminService {
     motors: ClientMotor[];
   }> {
     const client = await this.findClient(id);
-    const plants = await this.db.query<PlantSummary[]>(`
+    const plants = await this.db.query<PlantSummary[]>(
+      `
       SELECT p.id, p.name, p.code, p.location, p.status,
         COUNT(m.id)::integer AS "motorCount"
       FROM public.plants p
@@ -76,8 +82,11 @@ export class ClientsAdminService {
       WHERE p.client_id = $1
       GROUP BY p.id
       ORDER BY p.name ASC
-    `, [id]);
-    const motors = await this.db.query<ClientMotor[]>(`
+    `,
+      [id],
+    );
+    const motors = await this.db.query<ClientMotor[]>(
+      `
       SELECT m.id, m.plant_id AS "plantId", m.name, m.code, m.status,
         m.operational_status AS "operationalStatus",
         m.last_telemetry_at AS "lastTelemetryAt"
@@ -85,7 +94,9 @@ export class ClientsAdminService {
       JOIN public.plants p ON p.id = m.plant_id
       WHERE p.client_id = $1
       ORDER BY p.name ASC, m.name ASC
-    `, [id]);
+    `,
+      [id],
+    );
     return { client, plants, motors };
   }
 
@@ -93,77 +104,129 @@ export class ClientsAdminService {
     const name = dto.name.trim();
     if (!name) throw new BadRequestException('El nombre no puede estar vacío.');
     try {
-      const rows = await this.db.query<{ id: string }[]>(`
+      const rows = await this.db.query<{ id: string }[]>(
+        `
         INSERT INTO public.clients (name, tax_id, email, phone)
         VALUES ($1, $2, $3, $4)
         RETURNING id
-      `, [name, this.optional(dto.taxId), this.optional(dto.email)?.toLowerCase() ?? null, this.optional(dto.phone)]);
+      `,
+        [
+          name,
+          this.optional(dto.taxId),
+          this.optional(dto.email)?.toLowerCase() ?? null,
+          this.optional(dto.phone),
+        ],
+      );
       return this.findClient(rows[0].id);
     } catch (error) {
       this.mapDatabaseError(error);
     }
   }
 
-  async createPlant(clientId: string, dto: CreatePlantDto): Promise<PlantSummary> {
+  async createPlant(
+    clientId: string,
+    dto: CreatePlantDto,
+  ): Promise<PlantSummary> {
     const name = dto.name.trim();
     const code = dto.code.trim();
-    if (!name || !code) throw new BadRequestException('Nombre y código son obligatorios.');
+    if (!name || !code)
+      throw new BadRequestException('Nombre y código son obligatorios.');
     const client = await this.findClient(clientId);
     if (client.status !== 'ACTIVE') {
-      throw new BadRequestException('No se pueden agregar plantas a un cliente inactivo.');
+      throw new BadRequestException(
+        'No se pueden agregar plantas a un cliente inactivo.',
+      );
     }
     try {
-      const rows = await this.db.query<PlantSummary[]>(`
+      const rows = await this.db.query<PlantSummary[]>(
+        `
         INSERT INTO public.plants (client_id, name, code, location)
         VALUES ($1, $2, $3, $4)
         RETURNING id, name, code, location, status
-      `, [clientId, name, code, this.optional(dto.location)]);
+      `,
+        [clientId, name, code, this.optional(dto.location)],
+      );
       return { ...rows[0], motorCount: 0 };
     } catch (error) {
       this.mapDatabaseError(error);
     }
   }
 
-  async listUsers(clientId: string): Promise<{
-    id: string; email: string; displayName: string; role: string; status: string;
-  }[]> {
+  async listUsers(clientId: string): Promise<
+    {
+      id: string;
+      email: string;
+      displayName: string;
+      role: string;
+      status: string;
+    }[]
+  > {
     await this.findClient(clientId);
-    return this.db.query(`
+    return this.db.query(
+      `
       SELECT u.id, u.email, u.display_name AS "displayName", u.role, u.status
       FROM public.users u
       JOIN public.user_client_access uca ON uca.user_id = u.id
       WHERE uca.client_id = $1
       ORDER BY u.display_name, u.email
-    `, [clientId]);
+    `,
+      [clientId],
+    );
   }
 
-  async createUser(clientId: string, dto: CreateClientUserDto): Promise<{
-    id: string; email: string; displayName: string; role: string; status: string;
+  async createUser(
+    clientId: string,
+    dto: CreateClientUserDto,
+  ): Promise<{
+    id: string;
+    email: string;
+    displayName: string;
+    role: string;
+    status: string;
   }> {
     const client = await this.findClient(clientId);
     if (client.status !== 'ACTIVE') {
-      throw new BadRequestException('No se puede crear usuarios en una empresa inactiva.');
+      throw new BadRequestException(
+        'No se puede crear usuarios en una empresa inactiva.',
+      );
     }
     const email = dto.email.trim().toLowerCase();
     const displayName = dto.displayName.trim();
     if (!displayName || dto.password.length < 14) {
-      throw new BadRequestException('Nombre y contraseña de 14 caracteres son obligatorios.');
+      throw new BadRequestException(
+        'Nombre y contraseña de 14 caracteres son obligatorios.',
+      );
     }
     const hash = await argon2.hash(dto.password, {
-      type: argon2.argon2id, memoryCost: 65_536, timeCost: 3, parallelism: 1,
+      type: argon2.argon2id,
+      memoryCost: 65_536,
+      timeCost: 3,
+      parallelism: 1,
     });
     try {
       return await this.db.transaction(async (manager) => {
-        const rows = await manager.query<{
-          id: string; email: string; displayName: string; role: string; status: string;
-        }[]>(`
+        const rows = await manager.query<
+          {
+            id: string;
+            email: string;
+            displayName: string;
+            role: string;
+            status: string;
+          }[]
+        >(
+          `
           INSERT INTO public.users (email, display_name, password_hash, role, status)
           VALUES ($1, $2, $3, $4, 'ACTIVE')
           RETURNING id, email, display_name AS "displayName", role, status
-        `, [email, displayName, hash, dto.role ?? 'VIEWER']);
-        await manager.query(`
+        `,
+          [email, displayName, hash, dto.role ?? 'VIEWER'],
+        );
+        await manager.query(
+          `
           INSERT INTO public.user_client_access (user_id, client_id) VALUES ($1, $2)
-        `, [rows[0].id, clientId]);
+        `,
+          [rows[0].id, clientId],
+        );
         return rows[0];
       });
     } catch (error) {
@@ -176,10 +239,17 @@ export class ClientsAdminService {
   }
 
   private mapDatabaseError(error: unknown): never {
-    const postgres = error as { driverError?: { code?: string }; code?: string };
+    const postgres = error as {
+      driverError?: { code?: string };
+      code?: string;
+    };
     const code = postgres.driverError?.code ?? postgres.code;
-    if (code === '23505') throw new ConflictException('Ya existe un registro con esos datos.');
-    if (code === '23503') throw new BadRequestException('El cliente o la planta asociada no existe.');
+    if (code === '23505')
+      throw new ConflictException('Ya existe un registro con esos datos.');
+    if (code === '23503')
+      throw new BadRequestException(
+        'El cliente o la planta asociada no existe.',
+      );
     throw error;
   }
 }

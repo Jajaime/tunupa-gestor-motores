@@ -27,6 +27,7 @@ const { AccessTokenGuard } = require('../dist/auth/guards/access-token.guard');
 const { CsrfGuard } = require('../dist/auth/guards/csrf.guard');
 const { DashboardGateway } = require('../dist/realtime/dashboard.gateway');
 const { RealtimeAdapter } = require('../dist/realtime/realtime.adapter');
+const { TenantAccessService } = require('../dist/tenant-access/tenant-access.service');
 config({ path: resolve('.env'), quiet: true });
 config({ path: resolve('../../.env'), override: false, quiet: true });
 
@@ -109,6 +110,7 @@ test(
           { provide: AuthService, useValue: auth },
           { provide: ConfigService, useValue: settings },
           { provide: SessionAccessService, useValue: sessions },
+          { provide: TenantAccessService, useValue: new TenantAccessService(source) },
           DashboardGateway,
           {
             provide: CommittedEventsService,

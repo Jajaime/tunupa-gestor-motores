@@ -54,7 +54,11 @@ type DbSummary = Omit<FleetMotorSummary, 'lastTelemetryAt'> & {
 };
 type DbDetail = Omit<
   FleetMotorDetail,
-  'lastTelemetryAt' | 'ratedPowerKw' | 'ratedVoltage' | 'ratedCurrent' | 'ratedFrequencyHz'
+  | 'lastTelemetryAt'
+  | 'ratedPowerKw'
+  | 'ratedVoltage'
+  | 'ratedCurrent'
+  | 'ratedFrequencyHz'
 > & {
   lastTelemetryAt: Date | string | null;
   ratedPowerKw: string | number | null;
@@ -79,7 +83,8 @@ export class FleetService {
   constructor(private readonly db: DataSource) {}
 
   async list(user: AccessTokenPayload): Promise<FleetMotorSummary[]> {
-    const rows = await this.db.query<DbSummary[]>(`
+    const rows = await this.db.query<DbSummary[]>(
+      `
       SELECT m.id, c.id AS "clientId", c.name AS "clientName",
         p.id AS "plantId", p.name AS "plantName", m.name, m.code,
         m.status, m.operational_status AS "operationalStatus",
@@ -94,18 +99,24 @@ export class FleetService {
       JOIN public.clients c ON c.id = p.client_id
       WHERE ${tenantScope}
       ORDER BY c.name, p.name, m.name, m.id;
-    `, [user.role, user.sub]);
+    `,
+      [user.role, user.sub],
+    );
     return rows.map((row) => ({
       ...row,
       lastTelemetryAt: this.asDate(row.lastTelemetryAt),
     }));
   }
 
-  async detail(id: string, user: AccessTokenPayload): Promise<FleetMotorDetail> {
+  async detail(
+    id: string,
+    user: AccessTokenPayload,
+  ): Promise<FleetMotorDetail> {
     // Una sola sentencia SQL incorpora autorización, dispositivos y mediciones.
     // Esto impide filtrar información de un motor ajeno por UUID y mantiene
     // una misma instantánea de permisos para los datos relacionados.
-    const rows = await this.db.query<DbDetail[]>(`
+    const rows = await this.db.query<DbDetail[]>(
+      `
       SELECT m.id, c.id AS "clientId", c.name AS "clientName",
         p.id AS "plantId", p.name AS "plantName", p.location AS "plantLocation",
         m.name, m.code, m.status,
@@ -159,7 +170,9 @@ export class FleetService {
       JOIN public.plants p ON p.id = m.plant_id
       JOIN public.clients c ON c.id = p.client_id
       WHERE m.id = $3 AND ${tenantScope};
-    `, [user.role, user.sub, id]);
+    `,
+      [user.role, user.sub, id],
+    );
 
     const row = rows[0];
     if (!row) throw new NotFoundException('Motor no encontrado.');

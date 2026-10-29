@@ -74,8 +74,11 @@ interface ExistingMotorRow {
 export class DashboardService {
   constructor(private readonly dataSource: DataSource) {}
 
-  async findMotorSummaries(user: AccessTokenPayload): Promise<DashboardMotorSummary[]> {
-    const rows = await this.dataSource.query<DashboardMotorRow[]>(`
+  async findMotorSummaries(
+    user: AccessTokenPayload,
+  ): Promise<DashboardMotorSummary[]> {
+    const rows = await this.dataSource.query<DashboardMotorRow[]>(
+      `
       SELECT
         m.id,
         m.plant_id,
@@ -139,7 +142,9 @@ export class DashboardService {
         )
       ))
       ORDER BY m.name ASC;
-    `, [user.role, user.sub]);
+    `,
+      [user.role, user.sub],
+    );
 
     return rows.map((row) => ({
       id: row.id,
@@ -223,7 +228,10 @@ export class DashboardService {
     }));
   }
 
-  private async ensureMotorExists(motorId: string, user: AccessTokenPayload): Promise<void> {
+  private async ensureMotorExists(
+    motorId: string,
+    user: AccessTokenPayload,
+  ): Promise<void> {
     const rows = await this.dataSource.query<ExistingMotorRow[]>(
       `SELECT EXISTS (
         SELECT 1 FROM public.motors m

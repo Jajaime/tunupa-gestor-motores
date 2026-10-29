@@ -1,5 +1,10 @@
 import { Controller, Get, Param, ParseUUIDPipe, Req } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import type { AccessTokenPayload } from '../auth/auth.types';
 import { FleetService } from './fleet.service';

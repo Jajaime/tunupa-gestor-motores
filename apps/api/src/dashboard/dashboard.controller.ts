@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  Req,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import type { AccessTokenPayload } from '../auth/auth.types';
 import {
@@ -26,8 +33,12 @@ export class DashboardController {
   @ApiOkResponse({
     description: 'Resumen de motores con dispositivo y última telemetría',
   })
-  findMotorSummaries(@Req() request: Request): Promise<DashboardMotorSummary[]> {
-    return this.dashboardService.findMotorSummaries(request.user as AccessTokenPayload);
+  findMotorSummaries(
+    @Req() request: Request,
+  ): Promise<DashboardMotorSummary[]> {
+    return this.dashboardService.findMotorSummaries(
+      request.user as AccessTokenPayload,
+    );
   }
 
   @Get('motors/:id/history')
@@ -41,6 +52,10 @@ export class DashboardController {
     @Query() query: TelemetryHistoryQueryDto,
     @Req() request: Request,
   ): Promise<TelemetryHistoryPoint[]> {
-    return this.dashboardService.findTelemetryHistory(id, query, request.user as AccessTokenPayload);
+    return this.dashboardService.findTelemetryHistory(
+      id,
+      query,
+      request.user as AccessTokenPayload,
+    );
   }
 }

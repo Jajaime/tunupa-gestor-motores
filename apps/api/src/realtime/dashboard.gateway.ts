@@ -218,9 +218,11 @@ export class DashboardGateway
               continue;
             }
             const permitted = await this.tenantAccess.permittedMotorIds(
-              entry.claims, batch.map((event) => event.motorId),
+              entry.claims,
+              batch.map((event) => event.motorId),
             );
-            if (this.connections.get(socket) !== entry || !socket.connected) continue;
+            if (this.connections.get(socket) !== entry || !socket.connected)
+              continue;
             for (const event of batch) {
               if (permitted.has(event.motorId)) socket.emit(event.type, event);
             }
