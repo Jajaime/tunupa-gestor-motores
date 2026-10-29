@@ -10,6 +10,7 @@ import {
 } from '@nestjs/websockets';
 import type { Namespace, Socket } from 'socket.io';
 import { ACCESS_COOKIE } from '../auth/auth.constants';
+import { TenantAccessService } from '../tenant-access/tenant-access.service';
 import type { AccessTokenPayload } from '../auth/auth.types';
 import {
   SessionAccessError,
@@ -56,6 +57,7 @@ export class DashboardGateway
     private readonly sessions: SessionAccessService,
     private readonly config: ConfigService,
     private readonly events: CommittedEventsService,
+    private readonly tenantAccess: TenantAccessService,
   ) {}
 
   afterInit(server: Namespace): void {
@@ -215,7 +217,13 @@ export class DashboardGateway
               this.close(socket, 'ACCESS_EXPIRED');
               continue;
             }
-            for (const event of batch) socket.emit(event.type, event);
+            const permitted = await this.tenantAccess.permittedMotorIds(
+              entry.claims, batch.map((event) => event.motorId),
+            );
+            if (this.connections.get(socket) !== entry || !socket.connected) continue;
+            for (const event of batch) {
+              if (permitted.has(event.motorId)) socket.emit(event.type, event);
+            }
           } catch (error) {
             this.close(
               socket,

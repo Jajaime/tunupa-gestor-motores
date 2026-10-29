@@ -12,7 +12,7 @@ test('administración puede acceder al panel y a clientes', () => {
 test('operador y visor no ven la administración', () => {
   for (const role of ['OPERATOR', 'VIEWER', undefined]) {
     assert.deepEqual(getSidebarItems(role), [{
-      id: 'dashboard', href: '/', label: 'Panel general',
+      id: 'dashboard', href: '/', label: 'Resumen del cliente',
     }]);
   }
 });

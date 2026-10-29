@@ -363,6 +363,15 @@ body { color: var(--ink); background: var(--canvas); }
   .nav-item-label { display: none; }
 }
 
+/* GroundTEK: usuarios asociados a empresas (Patch 03). */
+.admin-client-detail .admin-form select {
+  width: 100%; padding: 11px; border: 1px solid #616674;
+  border-radius: 9px; color: var(--ink); background: var(--surface-raised);
+}
+.admin-client-detail .admin-form select:focus-visible {
+  outline: 3px solid var(--brand); outline-offset: 2px;
+}
+
 /* GroundTEK: gestión administrativa de clientes (Patch 02). */
 .admin-clients-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 .admin-clients-header h1 { margin: 4px 0 8px; font-family: Georgia, serif; font-weight: 500; font-size: clamp(30px, 3vw, 42px); }

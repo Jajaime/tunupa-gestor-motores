@@ -7,8 +7,9 @@ import { AppSidebar } from '@/components/layout/app-sidebar';
 import { useAuth } from '@/components/auth/auth-provider';
 import {
   createAdminClient, createAdminPlant, getAdminClient, getAdminClients,
+  createAdminClientUser, getAdminClientUsers,
 } from '@/lib/api';
-import type { AdminClientDetail, AdminClientSummary } from '@/lib/api';
+import type { AdminClientDetail, AdminClientSummary, AdminClientUser } from '@/lib/api';
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'No se pudo completar la operación.';
@@ -30,6 +31,11 @@ export function ClientsAdmin() {
   const [plantName, setPlantName] = useState('');
   const [plantCode, setPlantCode] = useState('');
   const [plantLocation, setPlantLocation] = useState('');
+  const [clientUsers, setClientUsers] = useState<AdminClientUser[]>([]);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPassword, setUserPassword] = useState('');
+  const [userRole, setUserRole] = useState<'VIEWER' | 'OPERATOR'>('VIEWER');
 
   useEffect(() => {
     if (user?.role !== 'ADMIN') return;
@@ -50,11 +56,12 @@ export function ClientsAdmin() {
       return;
     }
     let alive = true;
-    void getAdminClient(selectedId).then((result) => {
-      if (alive) setDetail(result);
-    }).catch((failure: unknown) => {
-      if (alive) setError(errorMessage(failure));
-    });
+    void Promise.all([getAdminClient(selectedId), getAdminClientUsers(selectedId)])
+      .then(([result, users]) => {
+        if (alive) { setDetail(result); setClientUsers(users); }
+      }).catch((failure: unknown) => {
+        if (alive) setError(errorMessage(failure));
+      });
     return () => { alive = false; };
   }, [selectedId, user?.role]);
 
@@ -89,6 +96,22 @@ export function ClientsAdmin() {
       setClients((previous) => previous.map((item) => item.id === selectedId ? refreshed.client : item));
       setPlantName(''); setPlantCode(''); setPlantLocation('');
       setNotice('Planta vinculada correctamente.');
+    } catch (failure) { setError(errorMessage(failure)); }
+    finally { setBusy(false); }
+  }
+
+  async function submitUser(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy || !selectedId) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const created = await createAdminClientUser(selectedId, {
+        email: userEmail.trim(), displayName: userName.trim(),
+        password: userPassword, role: userRole,
+      });
+      setClientUsers((previous) => [...previous, created]);
+      setUserEmail(''); setUserName(''); setUserPassword('');
+      setNotice('Usuario creado y asociado a la empresa. Entrega sus credenciales mediante un canal seguro.');
     } catch (failure) { setError(errorMessage(failure)); }
     finally { setBusy(false); }
   }
@@ -193,6 +216,42 @@ export function ClientsAdmin() {
                     </label>
                     <button type="submit" disabled={busy || detail.client.status !== 'ACTIVE'}>
                       {busy ? 'Guardando…' : 'Agregar planta'}
+                    </button>
+                  </form>
+                  <h3>Usuarios con acceso a esta empresa</h3>
+                  {clientUsers.length === 0
+                    ? <p className="admin-muted">Todavía no hay usuarios asociados.</p>
+                    : <div className="admin-table-scroll"><table className="admin-data-table">
+                        <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th></tr></thead>
+                        <tbody>{clientUsers.map((entry) => (
+                          <tr key={entry.id}><td>{entry.displayName}</td><td>{entry.email}</td>
+                            <td>{entry.role}</td><td>{entry.status}</td></tr>
+                        ))}</tbody>
+                      </table></div>}
+                  <h3>Registrar usuario cliente</h3>
+                  <p className="admin-muted">Acceso de prueba: asigna una contraseña inicial única de al menos 14 caracteres. La función de cambio de contraseña se incorpora en el módulo Mi cuenta.</p>
+                  <form className="admin-form" onSubmit={(event) => void submitUser(event)}>
+                    <label>Nombre del usuario *
+                      <input required maxLength={120} value={userName} autoComplete="off"
+                        onChange={(event) => setUserName(event.target.value)} />
+                    </label>
+                    <label>Correo de acceso *
+                      <input required type="email" maxLength={254} value={userEmail} autoComplete="off"
+                        onChange={(event) => setUserEmail(event.target.value)} />
+                    </label>
+                    <label>Contraseña inicial (mínimo 14 caracteres) *
+                      <input required type="password" minLength={14} maxLength={128}
+                        value={userPassword} autoComplete="new-password"
+                        onChange={(event) => setUserPassword(event.target.value)} />
+                    </label>
+                    <label>Permisos
+                      <select value={userRole} onChange={(event) => setUserRole(event.target.value as 'VIEWER' | 'OPERATOR')}>
+                        <option value="VIEWER">Solo lectura</option>
+                        <option value="OPERATOR">Operador (lectura por ahora)</option>
+                      </select>
+                    </label>
+                    <button type="submit" disabled={busy || detail.client.status !== 'ACTIVE'}>
+                      {busy ? 'Guardando…' : 'Crear usuario'}
                     </button>
                   </form>
                   <h3>Motores asociados</h3>

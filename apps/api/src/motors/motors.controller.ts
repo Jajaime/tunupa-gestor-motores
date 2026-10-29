@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -25,9 +26,11 @@ import { CreateMotorDto } from './dto/create-motor.dto';
 import { UpdateMotorDto } from './dto/update-motor.dto';
 import { Motor } from './entities/motor.entity';
 import { MotorsService } from './motors.service';
+import { AdminOnlyGuard } from '../clients-admin/admin-only.guard';
 
 @ApiTags('motors')
 @Controller('motors')
+@UseGuards(AdminOnlyGuard)
 export class MotorsController {
   constructor(private readonly motorsService: MotorsService) {}
 

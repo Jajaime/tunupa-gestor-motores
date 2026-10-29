@@ -94,9 +94,11 @@ export function Dashboard() {
       <section className="content" id="dashboard">
         <header className="topbar">
           <div>
-            <span className="eyebrow">MONITOREO EN TIEMPO REAL</span>
-            <h1>Estado de la operación</h1>
-            <p>Telemetría, condición y alarmas de los motores conectados.</p>
+            <span className="eyebrow">{user?.role === 'ADMIN' ? 'MONITOREO EN TIEMPO REAL' : 'PORTAL DEL CLIENTE'}</span>
+            <h1>{user?.role === 'ADMIN' ? 'Estado de la operación' : 'Resumen de mis motores'}</h1>
+            <p>{user?.role === 'ADMIN'
+              ? 'Telemetría, condición y alarmas de los motores conectados.'
+              : 'Lecturas, condición y alarmas de los equipos de tus empresas asignadas.'}</p>
           </div>
           <div className="session-actions">
             <span className="session-user">{user?.displayName ?? user?.email}</span>

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { TelemetryHistoryQueryDto } from './dto/telemetry-history-query.dto';
+import type { AccessTokenPayload } from '../auth/auth.types';
 
 export interface LatestMeasurement {
   value: number;
@@ -73,7 +74,7 @@ interface ExistingMotorRow {
 export class DashboardService {
   constructor(private readonly dataSource: DataSource) {}
 
-  async findMotorSummaries(): Promise<DashboardMotorSummary[]> {
+  async findMotorSummaries(user: AccessTokenPayload): Promise<DashboardMotorSummary[]> {
     const rows = await this.dataSource.query<DashboardMotorRow[]>(`
       SELECT
         m.id,
@@ -129,8 +130,16 @@ export class DashboardService {
           ORDER BY UPPER(t.measurement_type), t.measured_at DESC
         ) AS point
       ) AS latest ON TRUE
+      WHERE ($1::text = 'ADMIN' OR (
+        $1::text IN ('VIEWER', 'OPERATOR') AND EXISTS (
+          SELECT 1 FROM public.user_client_access uca
+          JOIN public.clients c ON c.id = uca.client_id
+          WHERE uca.user_id = $2 AND uca.client_id = p.client_id
+            AND c.status = 'ACTIVE'
+        )
+      ))
       ORDER BY m.name ASC;
-    `);
+    `, [user.role, user.sub]);
 
     return rows.map((row) => ({
       id: row.id,
@@ -158,9 +167,10 @@ export class DashboardService {
   async findTelemetryHistory(
     motorId: string,
     query: TelemetryHistoryQueryDto,
+    user: AccessTokenPayload,
   ): Promise<TelemetryHistoryPoint[]> {
     this.validateDateRange(query);
-    await this.ensureMotorExists(motorId);
+    await this.ensureMotorExists(motorId, user);
 
     const rows = await this.dataSource.query<TelemetryHistoryRow[]>(
       `
@@ -174,6 +184,17 @@ export class DashboardService {
             t.measured_at
           FROM public.telemetry AS t
           WHERE t.motor_id = $1
+            AND EXISTS (
+              SELECT 1 FROM public.motors m JOIN public.plants p ON p.id = m.plant_id
+              WHERE m.id = t.motor_id AND ($6::text = 'ADMIN' OR (
+                $6::text IN ('VIEWER', 'OPERATOR') AND EXISTS (
+                  SELECT 1 FROM public.user_client_access uca
+                  JOIN public.clients c ON c.id = uca.client_id
+                  WHERE uca.user_id = $7 AND uca.client_id = p.client_id
+                    AND c.status = 'ACTIVE'
+                )
+              ))
+            )
             AND ($2::varchar IS NULL OR UPPER(t.measurement_type) = $2)
             AND ($3::timestamptz IS NULL OR t.measured_at >= $3)
             AND ($4::timestamptz IS NULL OR t.measured_at <= $4)
@@ -188,6 +209,8 @@ export class DashboardService {
         query.from ?? null,
         query.to ?? null,
         query.limit,
+        user.role,
+        user.sub,
       ],
     );
 
@@ -200,12 +223,21 @@ export class DashboardService {
     }));
   }
 
-  private async ensureMotorExists(motorId: string): Promise<void> {
+  private async ensureMotorExists(motorId: string, user: AccessTokenPayload): Promise<void> {
     const rows = await this.dataSource.query<ExistingMotorRow[]>(
       `SELECT EXISTS (
-        SELECT 1 FROM public.motors WHERE id = $1
+        SELECT 1 FROM public.motors m
+        JOIN public.plants p ON p.id = m.plant_id
+        WHERE m.id = $1 AND ($2::text = 'ADMIN' OR (
+          $2::text IN ('VIEWER', 'OPERATOR') AND EXISTS (
+            SELECT 1 FROM public.user_client_access uca
+            JOIN public.clients c ON c.id = uca.client_id
+            WHERE uca.user_id = $3 AND uca.client_id = p.client_id
+              AND c.status = 'ACTIVE'
+          )
+        ))
       ) AS "exists";`,
-      [motorId],
+      [motorId, user.role, user.sub],
     );
 
     if (!rows[0]?.exists) {

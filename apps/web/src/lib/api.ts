@@ -248,6 +248,24 @@ export type CreateAdminPlant = {
   location?: string;
 };
 
+export interface AdminClientUser {
+  id: string;
+  email: string;
+  displayName: string;
+  role: 'OPERATOR' | 'VIEWER';
+  status: string;
+}
+
+export function getAdminClientUsers(clientId: string): Promise<AdminClientUser[]> {
+  return request<AdminClientUser[]>(`/admin/clients/${encodeURIComponent(clientId)}/users`);
+}
+
+export function createAdminClientUser(clientId: string, data: {
+  email: string; displayName: string; password: string; role: 'VIEWER' | 'OPERATOR';
+}): Promise<AdminClientUser> {
+  return mutate<AdminClientUser>(`/admin/clients/${encodeURIComponent(clientId)}/users`, data);
+}
+
 export function getAdminClients(): Promise<AdminClientSummary[]> {
   return request<AdminClientSummary[]>('/admin/clients');
 }

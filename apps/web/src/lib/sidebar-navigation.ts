@@ -11,7 +11,7 @@ export function getSidebarItems(role: AuthUser['role'] | undefined): SidebarItem
   const items: SidebarItem[] = [{
     id: 'dashboard',
     href: '/',
-    label: role === 'ADMIN' ? 'Panel general — Admin' : 'Panel general',
+    label: role === 'ADMIN' ? 'Panel general — Admin' : 'Resumen del cliente',
   }];
   if (role === 'ADMIN') {
     items.push({ id: 'clients', href: '/admin/clients', label: 'Clientes' });
