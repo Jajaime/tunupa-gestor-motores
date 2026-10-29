@@ -1,6 +1,6 @@
 import type {
   AuthUser, DashboardMotorSummary, TelemetryHistoryPoint,
-  FleetMotorSummary, FleetMotorDetail,
+  FleetMotorSummary, FleetMotorDetail, AlarmRecord, AlarmDetail, AlarmsQuery,
 } from './types';
 
 export const API_URL = (
@@ -302,4 +302,23 @@ export function getFleetMotors(): Promise<FleetMotorSummary[]> {
 
 export function getFleetMotor(id: string): Promise<FleetMotorDetail> {
   return request<FleetMotorDetail>(`/fleet/motors/${encodeURIComponent(id)}`);
+}
+
+export function getAlarms(filters: AlarmsQuery = {}): Promise<{
+  items: AlarmRecord[];
+  hasMore: boolean;
+}> {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') params.set(key, String(value));
+  });
+  return request<{ items: AlarmRecord[]; hasMore: boolean }>(`/alarms?${params}`);
+}
+
+export function getAlarm(id: string): Promise<AlarmDetail> {
+  return request<AlarmDetail>(`/alarms/${encodeURIComponent(id)}`);
+}
+
+export function acknowledgeAlarm(id: string): Promise<AlarmDetail> {
+  return mutate<AlarmDetail>(`/alarms/${encodeURIComponent(id)}/acknowledge`, {});
 }

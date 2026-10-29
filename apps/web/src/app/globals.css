@@ -441,3 +441,31 @@ body { color: var(--ink); background: var(--canvas); }
 @media (max-width: 1100px) { .fleet-specs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fleet-detail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .fleet-toolbar { grid-template-columns: 1fr; } .fleet-detail-jump { justify-items: start; } }
 @media (max-width: 560px) { .fleet-specs, .fleet-detail-summary { grid-template-columns: 1fr; } }
+/* GroundTEK: Patch 05 - alarmas y eventos. */
+.alarms-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+.alarms-filters label { display: grid; gap: 8px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.alarms-filters input, .alarms-filters select { min-height: 42px; width: 100%; padding: 9px 11px; border: 1px solid #616674; border-radius: 9px; color: var(--ink); background: var(--surface-raised); font: inherit; }
+.alarms-pill { display: inline-flex; padding: 5px 9px; border-radius: 8px; background: #3c414b; color: var(--ink); font-size: 12px; font-weight: 700; }
+.alarms-pill.critical { background: #4b2b30; color: #ffa39d; }
+.alarms-pill.warning { background: #4d3b25; color: #ffce82; }
+.alarms-pill.info { background: #294358; color: #a6d6ff; }
+.alarms-detail-button { border: 0; cursor: pointer; background: transparent; font: inherit; }
+.alarms-pager { display: flex; justify-content: flex-end; gap: 10px; padding: 18px; }
+.alarms-pager button:disabled { opacity: .45; cursor: not-allowed; }
+.alarms-detail { margin-top: 22px; padding-bottom: 20px; }
+.alarms-detail-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 20px; }
+.alarms-detail-grid div { display: grid; gap: 6px; min-width: 0; }
+.alarms-detail-grid small { color: var(--muted); }
+.alarms-detail-grid strong { overflow-wrap: anywhere; }
+.alarms-detail-grid a { color: var(--brand); }
+.alarms-message { padding: 0 20px; line-height: 1.6; }
+.alarms-ack { margin: 0 20px 16px; width: auto; }
+.alarms-detail > p.admin-muted { padding: 0 20px; line-height: 1.5; }
+.alarms-detail > h3 { margin: 20px 20px 10px; }
+.alarms-timeline { display: grid; gap: 12px; margin: 0 20px; padding: 0 0 0 28px; }
+.alarms-timeline li { border-left: 2px solid var(--brand); padding: 8px 10px 8px 14px; }
+.alarms-timeline strong, .alarms-timeline span, .alarms-timeline small { display: block; margin-bottom: 5px; }
+.alarms-timeline span, .alarms-timeline small { color: var(--muted); }
+.alarms-notice { border: 1px solid #456753; border-radius: 10px; background: #233d31; color: #b8f3cb; padding: 13px; }
+@media (max-width: 1000px) { .alarms-filters { grid-template-columns: repeat(2, minmax(0,1fr)); } .alarms-detail-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 600px) { .alarms-filters, .alarms-detail-grid { grid-template-columns: 1fr; } }

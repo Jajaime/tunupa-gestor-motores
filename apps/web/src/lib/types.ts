@@ -78,3 +78,49 @@ export interface FleetMotorDetail extends FleetMotorSummary {
   devices: FleetDevice[];
   latestMeasurements: Record<string, LatestMeasurement>;
 }
+
+export interface AlarmRecord {
+  id: string;
+  motorId: string;
+  motorName: string;
+  motorCode: string;
+  plantName: string;
+  clientName: string;
+  deviceId: string | null;
+  deviceCode: string | null;
+  alarmType: string;
+  severity: string;
+  status: string;
+  message: string;
+  measuredValue: number | null;
+  thresholdValue: number | null;
+  unit: string | null;
+  startedAt: string;
+  acknowledgedAt: string | null;
+  resolvedAt: string | null;
+}
+
+export interface AlarmEvent {
+  id: string;
+  eventType: string;
+  previousStatus: string | null;
+  currentStatus: string;
+  previousSeverity: string | null;
+  currentSeverity: string;
+  occurredAt: string;
+  actorName: string | null;
+}
+
+export interface AlarmDetail extends AlarmRecord {
+  events: AlarmEvent[];
+}
+
+export interface AlarmsQuery {
+  status?: string;
+  severity?: string;
+  motorId?: string;
+  from?: string;
+  to?: string;
+  limit?: number;
+  offset?: number;
+}

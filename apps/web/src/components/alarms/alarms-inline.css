@@ -1,0 +1,26 @@
+/* El detalle se despliega en la siguiente fila del registro seleccionado. */
+.fleet-table tbody tr.alarms-active-record {
+  background: var(--surface-raised);
+}
+.fleet-table tbody tr.alarms-inline-row:hover {
+  background: transparent;
+}
+.fleet-table td.alarms-inline-cell {
+  padding: 0 12px 18px;
+  vertical-align: top;
+}
+.alarms-inline-detail {
+  margin: 0 0 4px;
+  padding-bottom: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-raised);
+  overflow: hidden;
+  white-space: normal;
+}
+.alarms-inline-detail > .panel-heading {
+  padding-top: 18px;
+}
+.alarms-inline-detail .alarms-timeline {
+  padding-bottom: 4px;
+}

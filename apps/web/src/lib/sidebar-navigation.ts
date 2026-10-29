@@ -1,8 +1,8 @@
 import type { AuthUser } from './types';
 
 export interface SidebarItem {
-  id: 'dashboard' | 'clients' | 'motors';
-  href: '/' | '/admin/clients' | '/motors';
+  id: 'dashboard' | 'clients' | 'motors' | 'alarms';
+  href: '/' | '/admin/clients' | '/motors' | '/alarms';
   label: string;
 }
 
@@ -18,6 +18,7 @@ export function getSidebarItems(role: AuthUser['role'] | undefined): SidebarItem
   }
   if (role === 'ADMIN' || role === 'OPERATOR' || role === 'VIEWER') {
     items.push({ id: 'motors', href: '/motors', label: 'Mis motores' });
+    items.push({ id: 'alarms', href: '/alarms', label: 'Alarmas y eventos' });
   }
   return items;
 }
