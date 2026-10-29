@@ -30,7 +30,8 @@ export function AppSidebar({ role, apiConnection, lastRefresh }: SidebarProps) {
       </div>
       <nav aria-label="Navegación principal">
         {getSidebarItems(role).map((item) => {
-          const active = pathname === item.href;
+          const active = pathname === item.href ||
+            (item.id === 'motors' && pathname.startsWith('/motors/'));
           return (
             <Link key={item.id} className={`nav-item${active ? ' active' : ''}`} href={item.href}
               aria-current={active ? 'page' : undefined} title={item.label}>
@@ -41,6 +42,12 @@ export function AppSidebar({ role, apiConnection, lastRefresh }: SidebarProps) {
                   <>
                     <rect x="3" y="8" width="18" height="13" rx="2" />
                     <path d="M7 8V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3M3 14h18" />
+                  </>
+                ) : item.id === 'motors' ? (
+                  <>
+                    <circle cx="12" cy="12" r="8" />
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M12 4v3M20 12h-3M12 20v-3M4 12h3" />
                   </>
                 ) : (
                   <>

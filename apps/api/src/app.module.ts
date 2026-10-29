@@ -14,6 +14,7 @@ import { RealtimeModule } from './realtime/realtime.module';
 import { AuthModule } from './auth/auth.module';
 import { ClientsAdminModule } from './clients-admin/clients-admin.module';
 import { TenantAccessModule } from './tenant-access/tenant-access.module';
+import { FleetModule } from './fleet/fleet.module';
 import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { CsrfGuard } from './auth/guards/csrf.guard';
 
@@ -83,6 +84,7 @@ import { CsrfGuard } from './auth/guards/csrf.guard';
     RealtimeModule,
     ClientsAdminModule,
     TenantAccessModule,
+    FleetModule,
   ],
   controllers: [AppController],
   providers: [

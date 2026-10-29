@@ -401,3 +401,43 @@ body { color: var(--ink); background: var(--canvas); }
 .admin-feedback[role="alert"] { color: #ffb3ab; background: #452b30; border-color: #8f464a; }
 @media (max-width: 880px) { .admin-clients-grid { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .admin-form { grid-template-columns: 1fr; } .admin-clients-header { flex-direction: column; } }
+
+
+/* GroundTEK Patch 04: inventario y fichas técnicas de motores. */
+.fleet-toolbar { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 14px; margin: 20px 0; }
+.fleet-toolbar label { display: grid; gap: 8px; color: var(--muted); font-size: 13px; }
+.fleet-toolbar input, .fleet-toolbar select { width: 100%; padding: 12px; color: var(--ink); background: var(--surface-raised); border: 1px solid #616674; border-radius: 10px; font: inherit; }
+.fleet-table-wrap { overflow-x: auto; }
+.fleet-table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 13px; }
+.fleet-table th, .fleet-table td { padding: 15px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.fleet-table th { color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: .03em; }
+.fleet-table td strong { font-weight: 650; }
+.fleet-table td small { display: block; margin-top: 4px; color: var(--muted); }
+.fleet-table tbody tr:hover { background: #31343c; }
+.fleet-panel { padding: 20px; }
+.fleet-link, .fleet-back, .fleet-detail-jump a { color: var(--brand); text-decoration: none; font-weight: 700; }
+.fleet-link:hover, .fleet-back:hover, .fleet-detail-jump a:hover { color: var(--brand-hover); text-decoration: underline; }
+.fleet-link:focus-visible, .fleet-back:focus-visible, .fleet-detail-jump a:focus-visible,
+.fleet-toolbar input:focus-visible, .fleet-toolbar select:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.fleet-back { display: block; width: fit-content; margin-bottom: 10px; font-size: 13px; }
+.fleet-empty { padding: 22px; color: var(--muted); }
+.fleet-detail-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.fleet-detail-summary article { padding: 18px; display: grid; gap: 12px; }
+.fleet-detail-summary article > span { color: var(--muted); font-size: 12px; }
+.fleet-detail-summary article > strong { font-size: 19px; overflow-wrap: anywhere; }
+.fleet-detail-summary article > strong.fleet-date { font-size: 15px; }
+.fleet-condition.online { color: var(--green); }
+.fleet-condition.warning { color: var(--amber); }
+.fleet-condition.critical, .fleet-condition.offline { color: var(--red); }
+.fleet-detail-panel { padding: 22px; margin-top: 18px; }
+.fleet-specs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin: 20px 0 0; }
+.fleet-specs > div { min-width: 0; }
+.fleet-specs dt { color: var(--muted); font-size: 12px; margin-bottom: 7px; }
+.fleet-specs dd { margin: 0; color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
+.fleet-readings { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; padding-top: 18px; }
+.fleet-readings .measurement-card { min-width: 0; }
+.fleet-reading-time { display: block; font-size: 11px; color: var(--muted); margin-top: 6px; }
+.fleet-detail-jump { display: grid; justify-items: end; gap: 7px; font-size: 13px; color: var(--muted); }
+@media (max-width: 1100px) { .fleet-specs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fleet-detail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .fleet-toolbar { grid-template-columns: 1fr; } .fleet-detail-jump { justify-items: start; } }
+@media (max-width: 560px) { .fleet-specs, .fleet-detail-summary { grid-template-columns: 1fr; } }

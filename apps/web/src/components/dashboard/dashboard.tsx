@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import Link from 'next/link';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { useLiveDashboard } from './use-live-dashboard';
 import type {
@@ -166,7 +167,10 @@ export function Dashboard() {
           <>
             <section className="section-heading">
               <div><span className="eyebrow">{selectedMotor.code}</span><h2>{readingsAreStale ? 'Últimos indicadores recibidos' : 'Indicadores actuales'}</h2></div>
-              <span>Última lectura: {formatDate(selectedMotor.lastTelemetryAt)}</span>
+              <div className="fleet-detail-jump">
+                <span>Última lectura: {formatDate(selectedMotor.lastTelemetryAt)}</span>
+                <Link href={`/motors/${selectedMotor.id}`}>Ver ficha técnica</Link>
+              </div>
             </section>
             {readingsAreStale && (
               <p className="telemetry-notice" role="status">

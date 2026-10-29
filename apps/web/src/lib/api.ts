@@ -1,4 +1,7 @@
-import type { AuthUser, DashboardMotorSummary, TelemetryHistoryPoint } from './types';
+import type {
+  AuthUser, DashboardMotorSummary, TelemetryHistoryPoint,
+  FleetMotorSummary, FleetMotorDetail,
+} from './types';
 
 export const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1'
@@ -290,4 +293,13 @@ export function getMotorHistory(
   return request<TelemetryHistoryPoint[]>(
     `/dashboard/motors/${encodeURIComponent(motorId)}/history?${query}`,
   );
+}
+
+// Lectura de inventario y fichas; la autorización multiempresa se aplica en API.
+export function getFleetMotors(): Promise<FleetMotorSummary[]> {
+  return request<FleetMotorSummary[]>('/fleet/motors');
+}
+
+export function getFleetMotor(id: string): Promise<FleetMotorDetail> {
+  return request<FleetMotorDetail>(`/fleet/motors/${encodeURIComponent(id)}`);
 }
