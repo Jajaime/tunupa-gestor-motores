@@ -1,6 +1,7 @@
 import type {
   AuthUser, DashboardMotorSummary, TelemetryHistoryPoint,
   FleetMotorSummary, FleetMotorDetail, AlarmRecord, AlarmDetail, AlarmsQuery,
+  DeviceInventory,
 } from './types';
 
 export const API_URL = (
@@ -67,9 +68,11 @@ async function getCsrf(): Promise<string> {
   return csrfPromise;
 }
 
-async function postAuth(path: string, payload?: unknown): Promise<Response> {
+async function postAuth(
+  path: string, payload?: unknown, method: 'POST' | 'PATCH' = 'POST',
+): Promise<Response> {
   const post = async () => send(path, {
-    method: 'POST',
+    method,
     headers: {
       'Content-Type': 'application/json',
       'X-CSRF-Token': await getCsrf(),
@@ -184,17 +187,17 @@ export async function getCurrentUser(): Promise<AuthUser> {
 }
 
 // Mutaciones administrativas: misma protección de sesión, refresh y CSRF que login/logout.
-async function mutate<T>(path: string, payload: unknown): Promise<T> {
+async function mutate<T>(path: string, payload: unknown, method: 'POST' | 'PATCH' = 'POST'): Promise<T> {
   const version = sessionVersion;
   const revision = refreshRevision;
   try {
     assertSession(version);
-    let response = await postAuth(path, payload);
+    let response = await postAuth(path, payload, method);
     assertSession(version);
     if (response.status === 401) {
       if (revision === refreshRevision) await refreshSession();
       assertSession(version);
-      response = await postAuth(path, payload);
+      response = await postAuth(path, payload, method);
       assertSession(version);
     }
     return await read<T>(response);
@@ -321,4 +324,33 @@ export function getAlarm(id: string): Promise<AlarmDetail> {
 
 export function acknowledgeAlarm(id: string): Promise<AlarmDetail> {
   return mutate<AlarmDetail>(`/alarms/${encodeURIComponent(id)}/acknowledge`, {});
+}
+
+// Gestión de gateways. Modificaciones ADMIN, lecturas filtradas en API.
+export function getDevices(): Promise<DeviceInventory[]> {
+  return request<DeviceInventory[]>('/devices');
+}
+
+export function getDevice(id: string): Promise<DeviceInventory> {
+  return request<DeviceInventory>(`/devices/${encodeURIComponent(id)}`);
+}
+
+export function createDevice(data: {
+  motorId: string;
+  name: string;
+  code: string;
+  communicationType: 'WIFI' | 'LTE' | 'LORAWAN';
+  serialNumber?: string;
+  firmwareVersion?: string;
+}): Promise<DeviceInventory> {
+  return mutate<DeviceInventory>('/devices', data);
+}
+
+export function updateDevice(id: string, data: {
+  name?: string;
+  communicationType?: 'WIFI' | 'LTE' | 'LORAWAN';
+  serialNumber?: string | null;
+  firmwareVersion?: string | null;
+}): Promise<DeviceInventory> {
+  return mutate<DeviceInventory>(`/devices/${encodeURIComponent(id)}`, data, 'PATCH');
 }

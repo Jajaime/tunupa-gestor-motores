@@ -1,8 +1,8 @@
 import type { AuthUser } from './types';
 
 export interface SidebarItem {
-  id: 'dashboard' | 'clients' | 'motors' | 'alarms';
-  href: '/' | '/admin/clients' | '/motors' | '/alarms';
+  id: 'dashboard' | 'clients' | 'motors' | 'alarms' | 'devices';
+  href: '/' | '/admin/clients' | '/motors' | '/alarms' | '/devices';
   label: string;
 }
 
@@ -19,6 +19,7 @@ export function getSidebarItems(role: AuthUser['role'] | undefined): SidebarItem
   if (role === 'ADMIN' || role === 'OPERATOR' || role === 'VIEWER') {
     items.push({ id: 'motors', href: '/motors', label: 'Mis motores' });
     items.push({ id: 'alarms', href: '/alarms', label: 'Alarmas y eventos' });
+    items.push({ id: 'devices', href: '/devices', label: 'Dispositivos' });
   }
   return items;
 }

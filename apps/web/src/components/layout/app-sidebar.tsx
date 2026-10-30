@@ -43,6 +43,11 @@ export function AppSidebar({ role, apiConnection, lastRefresh }: SidebarProps) {
                     <rect x="3" y="8" width="18" height="13" rx="2" />
                     <path d="M7 8V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3M3 14h18" />
                   </>
+                ) : item.id === 'devices' ? (
+                  <>
+                    <rect x="4" y="5" width="16" height="14" rx="2" />
+                    <path d="M8 9h8M8 13h8M9 19v2M15 19v2" />
+                  </>
                 ) : item.id === 'alarms' ? (
                   <>
                     <path d="M12 3c-4 0-6 3-6 7v4l-2 3h16l-2-3v-4c0-4-2-7-6-7z" />

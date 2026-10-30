@@ -16,6 +16,7 @@ import { ClientsAdminModule } from './clients-admin/clients-admin.module';
 import { TenantAccessModule } from './tenant-access/tenant-access.module';
 import { FleetModule } from './fleet/fleet.module';
 import { AlarmsModule } from './alarms/alarms.module';
+import { DevicesModule } from './devices/devices.module';
 import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { CsrfGuard } from './auth/guards/csrf.guard';
 
@@ -87,6 +88,7 @@ import { CsrfGuard } from './auth/guards/csrf.guard';
     TenantAccessModule,
     FleetModule,
     AlarmsModule,
+    DevicesModule,
   ],
   controllers: [AppController],
   providers: [

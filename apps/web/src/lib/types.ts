@@ -124,3 +124,23 @@ export interface AlarmsQuery {
   limit?: number;
   offset?: number;
 }
+
+// La API nunca entrega d.configuration: puede contener parámetros sensibles.
+export interface DeviceInventory {
+  id: string;
+  clientId: string;
+  clientName: string;
+  plantId: string;
+  plantName: string;
+  motorId: string | null;
+  motorName: string | null;
+  motorCode: string | null;
+  name: string;
+  code: string;
+  serialNumber: string | null;
+  firmwareVersion: string | null;
+  communicationType: 'WIFI' | 'LTE' | 'LORAWAN';
+  status: string;
+  lastConnectionAt: string | null;
+  lastTelemetryReceivedAt: string | null;
+}
