@@ -7,8 +7,9 @@ import '../styles/tunupa-brand-tokens.css';
 import '../styles/tunupa-theme.css';
 
 export const metadata: Metadata = {
-  title: 'Tunupa | Monitoreo de motores',
-  description: 'Dashboard de telemetría y condición de motores eléctricos.',
+  title: 'TUNUPA | Gestor de motores',
+  applicationName: 'TUNUPA',
+  description: 'Monitoreo de motores eléctricos y gestión de activos.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

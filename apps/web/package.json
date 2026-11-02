@@ -8,14 +8,15 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "npm run typecheck && npm run test:auth && npm run test:dashboard && npm run test:realtime && npm run test:updates && npm run test:navigation && npm run test:brand && npm run test:theme",
+    "test": "npm run typecheck && npm run test:auth && npm run test:dashboard && npm run test:realtime && npm run test:updates && npm run test:navigation && npm run test:brand && npm run test:theme && npm run test:icons",
     "test:auth": "node --test tests/auth-api.test.mjs",
     "test:dashboard": "node --test tests/dashboard-status.test.mjs",
     "test:realtime": "node --test tests/realtime-session.test.mjs",
     "test:updates": "node --test tests/live-updates.test.mjs",
     "test:navigation": "node --test tests/sidebar-navigation.test.mjs",
     "test:brand": "node --test tests/brand-assets.test.mjs",
-    "test:theme": "node --test tests/theme-tokens.test.mjs"
+    "test:theme": "node --test tests/theme-tokens.test.mjs",
+    "test:icons": "node --test tests/app-icons.test.mjs"
   },
   "dependencies": {
     "next": "16.4.3",
