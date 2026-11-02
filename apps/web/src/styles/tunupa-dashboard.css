@@ -1,0 +1,368 @@
+/*
+ * TUNUPA — Patch 06: dashboard de motores (base GitHub 334ac94).
+ * Solo presentación. Los KPI, estado de la API, selección de motor, telemetría,
+ * Recharts, usuarios y permisos siguen implementados por los componentes actuales.
+ * Se importa AL FINAL, después de tunupa-modules.css.
+ * El selector #dashboard impide afectar los demás módulos.
+ */
+#dashboard.content {
+  --tunupa-dash-panel: #292b31;
+  --tunupa-dash-border: #4c4243;
+  --tunupa-dash-muted: #c7c2c6;
+  --tunupa-dash-radius: 18px;
+  padding-top: clamp(22px, 3vw, 42px);
+  padding-bottom: 70px;
+}
+
+/* Hero: superficie editorial oscura, acento volcánico y marca oficial. */
+#dashboard .topbar {
+  position: relative;
+  isolation: isolate;
+  align-items: center;
+  padding: clamp(23px, 2.7vw, 34px);
+  margin-bottom: 24px;
+  overflow: hidden;
+  border: 1px solid #684335;
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 88% 10%, rgba(241, 90, 0, .20), transparent 45%),
+    linear-gradient(113deg, #31252a 0%, #27272e 56%, #21232a 100%);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .14);
+}
+#dashboard .topbar::before {
+  content: '';
+  position: absolute;
+  right: -10px;
+  bottom: -31px;
+  width: clamp(130px, 19vw, 250px);
+  height: clamp(135px, 19vw, 245px);
+  background: url('/brand/tunupa/symbol-orange.svg') center / contain no-repeat;
+  opacity: .085;
+  pointer-events: none;
+  z-index: 0;
+}
+#dashboard .topbar > * { position: relative; z-index: 1; min-width: 0; }
+#dashboard .topbar .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border: 1px solid #8d5a3b;
+  border-radius: 999px;
+  background: #48312b;
+  color: #ffc29a;
+  font-size: 10px;
+  letter-spacing: .12em;
+}
+#dashboard .topbar .eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tunupa-orange-light);
+}
+#dashboard .topbar h1 {
+  margin: 15px 0 10px;
+  font-size: clamp(27px, 2.9vw, 42px);
+  font-weight: 700;
+  letter-spacing: -.045em;
+  line-height: 1.14;
+}
+#dashboard .topbar p {
+  max-width: 61ch;
+  color: #d4ccd0;
+  line-height: 1.55;
+  font-size: 14px;
+}
+#dashboard .session-actions {
+  flex: 0 1 240px;
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+  text-align: right;
+}
+#dashboard .session-user {
+  max-width: 100%;
+  color: #f5ebe6;
+  font-weight: 650;
+  font-size: 12px;
+}
+#dashboard .session-actions > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+}
+#dashboard .refresh-button {
+  min-height: 40px;
+  padding: 9px 15px;
+  border-radius: 10px;
+  border-color: #746167;
+  background: rgba(39, 37, 45, .9);
+  color: #f8f3f1;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background-color .16s ease, border-color .16s ease;
+}
+#dashboard .refresh-button:first-child {
+  background: var(--brand-button);
+  border-color: #c94a00;
+  color: #fff;
+}
+#dashboard .refresh-button:hover { background: #49342f; border-color: #ff9a60; }
+#dashboard .refresh-button:first-child:hover { background: #b94600; }
+#dashboard .realtime-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 0;
+  font-weight: 650;
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: right;
+}
+#dashboard .realtime-status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: currentColor; /* Hereda verde/ámbar/rojo del estado real. */
+}
+
+/* KPI: cifras en primer plano; las señales reales siguen en los datos. */
+#dashboard .summary-grid { gap: 16px; margin-bottom: 25px; }
+#dashboard .summary-grid article {
+  position: relative;
+  min-width: 0;
+  min-height: 147px;
+  padding: 21px 21px 19px;
+  overflow: hidden;
+  border: 1px solid var(--tunupa-dash-border);
+  border-radius: var(--tunupa-dash-radius);
+  background: linear-gradient(146deg, #303039, var(--tunupa-dash-panel) 68%);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, .11);
+}
+#dashboard .summary-grid article::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20px;
+  bottom: 20px;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: var(--tunupa-orange-light);
+}
+#dashboard .summary-grid article:nth-child(2)::before { background: var(--green); }
+#dashboard .summary-grid article:nth-child(3)::before { background: var(--red); }
+#dashboard .summary-grid article:nth-child(4)::before { background: #d7ae8b; }
+#dashboard .summary-grid article > span {
+  color: #e0d9dd;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .015em;
+}
+#dashboard .summary-grid article > strong {
+  margin: 14px 0 8px;
+  font-family: var(--tunupa-font-display);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(31px, 3.2vw, 42px);
+  line-height: 1;
+  letter-spacing: -.035em;
+  color: var(--tunupa-ice);
+}
+#dashboard .summary-grid article:nth-child(2) > strong { color: var(--green); }
+#dashboard .summary-grid article > strong.text-alert { color: var(--red); }
+#dashboard .summary-grid article > small {
+  color: var(--tunupa-dash-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* Flota: filas de lectura rápida con acción de selección conservada. */
+#dashboard .panel {
+  border: 1px solid var(--tunupa-dash-border);
+  border-radius: var(--tunupa-dash-radius);
+  background: var(--tunupa-dash-panel);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, .09);
+}
+#dashboard .panel-heading {
+  min-height: 87px;
+  padding: 21px 24px;
+  border-bottom-color: #514448;
+}
+#dashboard .panel-heading h2,
+#dashboard .section-heading h2 {
+  margin-top: 7px;
+  color: var(--tunupa-ice);
+  font-family: var(--tunupa-font-display);
+  font-size: clamp(19px, 2vw, 25px);
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+#dashboard .panel-heading .eyebrow,
+#dashboard .section-heading .eyebrow {
+  color: var(--tunupa-orange-light);
+  font-size: 10px;
+  letter-spacing: .13em;
+}
+#dashboard .panel-heading > span { color: #d0c9ce; }
+#dashboard .motor-row {
+  min-height: 76px;
+  border-bottom-color: #454148;
+  background: transparent;
+  color: var(--tunupa-ice);
+  transition: background-color .16s ease;
+}
+#dashboard .motor-row:hover { background: #373037; }
+#dashboard .motor-row.selected {
+  background: #40302e;
+  box-shadow: inset 3px 0 var(--tunupa-orange);
+}
+#dashboard .motor-identity { min-width: 0; }
+#dashboard .motor-identity strong {
+  color: var(--tunupa-ice);
+  font-size: 13px;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+#dashboard .motor-identity small {
+  color: var(--tunupa-dash-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+#dashboard .motor-device,
+#dashboard .motor-time,
+#dashboard .alarm-count { font-variant-numeric: tabular-nums; }
+#dashboard .motor-row:focus-visible {
+  outline: 3px solid var(--tunupa-orange-light);
+  outline-offset: -4px;
+}
+
+/* Tarjetas de sensores: valores, unidades y calidad sin alterar la semántica. */
+#dashboard .section-heading { gap: 17px; margin-top: 32px; margin-bottom: 17px; }
+#dashboard .measurements-grid { gap: 15px; margin-bottom: 29px; }
+#dashboard .measurement-card {
+  min-width: 0;
+  min-height: 126px;
+  padding: 20px;
+  gap: 13px;
+  border: 1px solid var(--tunupa-dash-border);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #333039 0%, #292b31 100%);
+}
+#dashboard .measurement-card > div:nth-child(2) { min-width: 0; }
+#dashboard .measurement-icon {
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border: 1px solid #7a4c34;
+  border-radius: 13px;
+  background: #473027;
+  color: #ffbe92;
+  font-size: 10px;
+  letter-spacing: .035em;
+}
+#dashboard .measurement-value {
+  margin-top: 9px;
+  color: var(--tunupa-ice);
+  font-family: var(--tunupa-font-display);
+  font-size: clamp(23px, 2.4vw, 31px);
+  font-weight: 720;
+  line-height: 1.15;
+  letter-spacing: -.035em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+#dashboard .measurement-value small {
+  margin-left: 5px;
+  color: var(--tunupa-dash-muted);
+  font-family: var(--tunupa-font-body);
+  font-size: 11px;
+  font-weight: 500;
+}
+#dashboard .quality {
+  top: 10px;
+  right: 11px;
+  font-size: 9px;
+  letter-spacing: .045em;
+}
+
+/* Histórico: más espacio para la serie, selector legible y rejilla oscura. */
+#dashboard .chart-panel { min-height: 437px; }
+#dashboard .chart-heading { gap: 16px; }
+#dashboard .chart-heading select {
+  min-height: 42px;
+  min-width: 170px;
+  border: 1px solid #79605a;
+  border-radius: 10px;
+  padding: 9px 13px;
+  background: #373239;
+  color: var(--tunupa-ice);
+  font-size: 12px;
+}
+#dashboard .chart-heading select:focus-visible { outline: 3px solid var(--tunupa-focus-ring); outline-offset: 3px; }
+#dashboard .chart-container { height: 338px; padding: 21px 16px 17px 6px; }
+#dashboard .chart-empty,
+#dashboard .loading-block { color: #d1c9cf; }
+#dashboard .fleet-detail-jump { gap: 8px; }
+#dashboard .fleet-detail-jump a { color: var(--tunupa-orange-light); }
+
+/* Mantener el significado visual de errores, calidad y conexión en sus reglas originales. */
+#dashboard .telemetry-notice,
+#dashboard .error-banner { border-radius: 12px; line-height: 1.5; }
+
+@media (max-width: 1260px) {
+  #dashboard .topbar { align-items: flex-start; }
+  #dashboard .summary-grid article { padding: 19px 17px; }
+  #dashboard .measurement-card { padding: 17px 15px; }
+}
+@media (max-width: 960px) {
+  #dashboard .topbar { flex-wrap: wrap; }
+  #dashboard .session-actions {
+    flex: 1 1 100%;
+    justify-items: start;
+    text-align: left;
+    padding-top: 14px;
+    border-top: 1px solid #61463d;
+  }
+  #dashboard .session-actions > div { justify-content: flex-start; }
+  #dashboard .realtime-status { justify-content: flex-start; }
+  #dashboard .measurements-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  #dashboard.content { padding: 22px 16px 44px; }
+  #dashboard .topbar { padding: 22px; margin-bottom: 19px; }
+  #dashboard .topbar h1 { font-size: clamp(26px, 7vw, 35px); }
+  #dashboard .topbar p { display: block; font-size: 12px; }
+  #dashboard .topbar::before { opacity: .06; }
+  #dashboard .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+  #dashboard .summary-grid article { min-height: 132px; padding: 17px 14px; }
+  #dashboard .summary-grid article > strong { font-size: 31px; }
+  #dashboard .panel-heading { padding: 18px; }
+  #dashboard .motor-row { padding: 15px 16px; min-height: 73px; }
+  #dashboard .section-heading { align-items: flex-start; flex-wrap: wrap; }
+  #dashboard .fleet-detail-jump { justify-items: start; }
+  #dashboard .chart-container { height: 280px; padding-inline: 4px; }
+  #dashboard .chart-panel { min-height: 382px; }
+}
+@media (max-width: 520px) {
+  #dashboard .topbar { padding: 19px 17px; }
+  #dashboard .session-actions > div { width: 100%; }
+  #dashboard .session-actions .refresh-button { flex: 1 1 auto; }
+  #dashboard .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #dashboard .summary-grid article { min-height: 129px; padding: 15px 12px; }
+  #dashboard .summary-grid article > strong { font-size: 29px; }
+  #dashboard .summary-grid article > span { font-size: 11px; }
+  #dashboard .summary-grid article > small { font-size: 10px; }
+  #dashboard .measurements-grid { grid-template-columns: 1fr; }
+  #dashboard .measurement-card { min-height: 108px; }
+  #dashboard .chart-heading select { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #dashboard .refresh-button,
+  #dashboard .motor-row { transition: none; }
+}
