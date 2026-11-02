@@ -5,6 +5,7 @@ import './globals.css';
 // Aplicar las variables y ajustes TUNUPA después del CSS histórico.
 import '../styles/tunupa-brand-tokens.css';
 import '../styles/tunupa-theme.css';
+import '../styles/tunupa-sidebar.css';
 
 export const metadata: Metadata = {
   title: 'TUNUPA | Gestor de motores',
