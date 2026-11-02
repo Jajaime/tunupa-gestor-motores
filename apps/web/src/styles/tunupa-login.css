@@ -1,0 +1,240 @@
+/* TUNUPA Patch 05 — Login: identidad volcánica abstracta y formulario oscuro.
+ * Cargar después de globals, theme y sidebar. No afecta la autenticación.
+ * La ilustración es decorativa y se construye con CSS, sin recursos externos.
+ */
+.auth-screen.tunupa-login {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: clamp(16px, 3vw, 36px);
+  background: radial-gradient(circle at 15% 5%, #422b22 0, transparent 37%),
+    var(--tunupa-surface-0);
+}
+.tunupa-login-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(365px, .92fr);
+  width: min(100%, 1160px);
+  min-height: min(710px, calc(100dvh - 72px));
+  overflow: hidden;
+  border: 1px solid #5a4237;
+  border-radius: 24px;
+  background: var(--tunupa-surface-1);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .42);
+}
+.tunupa-login-story {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  padding: clamp(26px, 3.8vw, 52px);
+  background: radial-gradient(ellipse at 70% 58%, rgba(241, 90, 0, .28), transparent 45%),
+    linear-gradient(148deg, #352014 5%, var(--tunupa-brown) 55%, #1c1921 100%);
+  color: var(--tunupa-ice);
+}
+.tunupa-login-story::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: '';
+  opacity: .22;
+  background-image: linear-gradient(rgba(255, 255, 255, .09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .09) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: linear-gradient(to bottom, #000, transparent 75%);
+}
+.tunupa-login-wordmark {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: min(100%, 270px);
+  height: auto;
+}
+.tunupa-login-story-copy {
+  position: relative;
+  z-index: 2;
+  margin-top: clamp(56px, 11vh, 126px);
+  max-width: 460px;
+}
+.tunupa-login-kicker {
+  color: var(--tunupa-orange-light);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+.tunupa-login-story-copy h2 {
+  margin: 16px 0 18px;
+  color: #fff;
+  font-family: var(--tunupa-font-display);
+  font-size: clamp(32px, 3.7vw, 50px);
+  font-weight: 750;
+  line-height: 1.11;
+  letter-spacing: -.035em;
+}
+.tunupa-login-story-copy p {
+  margin: 0;
+  max-width: 380px;
+  color: #e6dcd8;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.tunupa-login-landscape {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.tunupa-login-sun {
+  position: absolute;
+  bottom: 13%;
+  left: 53%;
+  width: 210px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, #ffa964 0, #f15a00 55%, rgba(241, 90, 0, 0) 72%);
+  filter: blur(4px);
+  opacity: .75;
+}
+.tunupa-login-mountain-far,
+.tunupa-login-mountain-near {
+  position: absolute;
+  inset-inline: -4%;
+  bottom: 0;
+  height: 36%;
+  clip-path: polygon(0 71%, 15% 53%, 24% 65%, 41% 16%, 54% 49%, 65% 33%, 75% 57%, 88% 42%, 100% 64%, 100% 100%, 0 100%);
+}
+.tunupa-login-mountain-far {
+  background: linear-gradient(#ab5533, #432b2c);
+  opacity: .73;
+  transform: translateY(-9%);
+}
+.tunupa-login-mountain-near {
+  height: 24%;
+  background: linear-gradient(#49302e, #201d23);
+  clip-path: polygon(0 57%, 11% 39%, 24% 68%, 40% 40%, 57% 73%, 72% 23%, 86% 66%, 100% 46%, 100% 100%, 0 100%);
+}
+.tunupa-login-story-foot {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  padding-top: 160px;
+  color: #e8c3b1;
+  font-size: 11px;
+  letter-spacing: .035em;
+}
+.auth-card.tunupa-login-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: clamp(30px, 5vw, 66px);
+  border: 0;
+  border-left: 1px solid #584238;
+  border-radius: 0;
+  background: #292a30;
+  box-shadow: none;
+}
+.tunupa-login-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: clamp(32px, 5vh, 54px);
+  color: #fff;
+  font-family: var(--tunupa-font-display);
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: .035em;
+}
+.tunupa-login-card-head span small {
+  display: block;
+  margin-top: 4px;
+  color: #cfc2c0;
+  font-family: var(--tunupa-font-body);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .08em;
+}
+.tunupa-login-symbol { width: 49px; height: 45px; object-fit: contain; }
+.tunupa-login-card .eyebrow { color: var(--tunupa-orange-light); }
+.tunupa-login-card h1 {
+  margin: 10px 0 8px;
+  font-size: clamp(31px, 3.6vw, 42px);
+  font-weight: 750;
+  letter-spacing: -.025em;
+}
+.tunupa-login-card > p {
+  margin: 0;
+  color: #c5c4cb;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.tunupa-login-card form { margin-top: 12px; }
+.tunupa-login-card fieldset { gap: 10px; margin-top: 9px; }
+.tunupa-login-card label { color: #f2f0f1; }
+.tunupa-login-card input {
+  min-height: 48px;
+  border: 1px solid #62616a;
+  background: #1c1e24;
+  color: #fff;
+  transition: border-color .15s ease;
+}
+.tunupa-login-card input:hover { border-color: #a4806e; }
+.tunupa-login-card input:focus-visible {
+  border-color: var(--tunupa-orange-light);
+  outline: 3px solid var(--tunupa-focus-ring);
+  outline-offset: 2px;
+}
+.tunupa-login-card .auth-submit {
+  min-height: 49px;
+  margin-top: 17px;
+  background: var(--brand-button);
+  font-weight: 750;
+  transition: background-color .15s ease;
+}
+.tunupa-login-card .auth-submit:hover { background: #b94600; }
+.tunupa-login-card .auth-submit:disabled { cursor: wait; }
+.tunupa-login-card .auth-error { margin-top: 18px; line-height: 1.55; }
+.tunupa-login-helper { margin-top: 17px; color: #aaa9b3; font-size: 11px; line-height: 1.5; }
+.tunupa-login-credit {
+  margin-top: clamp(32px, 6vh, 70px);
+  padding-top: 18px;
+  border-top: 1px solid #45444a;
+  color: #adaab1;
+  font-size: 11px;
+}
+.tunupa-login-credit strong { color: #f4d7c7; }
+.auth-screen.tunupa-login-pending { display: flex; flex-direction: column; gap: 14px; color: #f3f4f6; }
+.tunupa-login-pending p { color: #ddd7d7; }
+@media (max-width: 900px) {
+  .tunupa-login-shell { grid-template-columns: minmax(0, 1fr) minmax(330px, 1fr); }
+  .tunupa-login-story { padding: 28px; }
+  .tunupa-login-story-copy h2 { font-size: 32px; }
+  .tunupa-login-card { padding: 36px 28px; }
+}
+@media (max-width: 720px) {
+  .auth-screen.tunupa-login { padding: 14px; }
+  .tunupa-login-shell { display: flex; flex-direction: column; min-height: auto; border-radius: 18px; }
+  .tunupa-login-story { min-height: 220px; padding: 23px 27px; }
+  .tunupa-login-wordmark { width: min(65%, 205px); }
+  .tunupa-login-story-copy { margin-top: 18px; }
+  .tunupa-login-story-copy h2 { margin: 10px 0 0; font-size: clamp(22px, 6vw, 31px); }
+  .tunupa-login-story-copy p, .tunupa-login-story-foot { display: none; }
+  .tunupa-login-landscape { opacity: .55; }
+  .tunupa-login-sun { width: 145px; }
+  .auth-card.tunupa-login-card { padding: 31px 27px 33px; border-left: 0; border-top: 1px solid #584238; }
+  .tunupa-login-card-head { display: none; }
+  .tunupa-login-card h1 { font-size: 32px; }
+  .tunupa-login-credit { margin-top: 27px; }
+}
+@media (max-width: 420px) {
+  .tunupa-login-story { min-height: 205px; }
+  .tunupa-login-story-copy h2 { font-size: 23px; }
+  .auth-card.tunupa-login-card { padding: 28px 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tunupa-login-card input, .tunupa-login-card .auth-submit { transition: none; }
+}
