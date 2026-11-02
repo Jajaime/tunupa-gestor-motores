@@ -1,0 +1,155 @@
+/*
+ * TUNUPA — Patch 02: tema oscuro de la aplicación.
+ * Se carga DESPUÉS de globals.css y tunupa-brand-tokens.css.
+ * No modificar aquí los estados operativos de conexión, alarma o criticidad.
+ * El rediseño del símbolo, sidebar y login se integra en patches posteriores.
+ */
+:root {
+  color-scheme: dark;
+
+  /* Paleta B oficial (referencias definidas en tunupa-brand-tokens.css). */
+  --tunupa-accent: var(--tunupa-orange);
+  --tunupa-accent-readable: var(--tunupa-orange-light);
+  --tunupa-accent-subtle: #3b2923;
+  --tunupa-border-accent: #76503a;
+
+  /* Superficies neutras oscuras para métricas y gráficas. */
+  --tunupa-surface-0: #1b1d22;
+  --tunupa-surface-1: #292b31;
+  --tunupa-surface-2: #33343c;
+  --tunupa-border: #48474e;
+  --tunupa-text: var(--tunupa-ice);
+  --tunupa-text-muted: #c2c2cb;
+
+  /* Componentes y tipografía. Fallback local: sin peticiones a Google Fonts. */
+  --tunupa-font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --tunupa-font-display: 'Montserrat', 'Inter', system-ui, sans-serif;
+  --tunupa-radius-control: 10px;
+  --tunupa-radius-card: 16px;
+  --tunupa-focus-ring: var(--tunupa-orange-light);
+
+  /* Adaptadores para los componentes actuales: sin cambiar su lógica. */
+  --ink: var(--tunupa-text);
+  --muted: var(--tunupa-text-muted);
+  --line: var(--tunupa-border);
+  --surface: var(--tunupa-surface-1);
+  --surface-raised: var(--tunupa-surface-2);
+  --canvas: var(--tunupa-surface-0);
+  --brand: var(--tunupa-accent-readable);
+  --brand-hover: #ffac73;
+  --brand-soft: var(--tunupa-accent-subtle);
+  --brand-button: #c94a00; /* Derivado accesible: blanco sobre fondo >= 4.5:1. */
+  --brand-graphite: var(--tunupa-neutral-dark);
+  --chart-grid: #44454d;
+  --chart-axis: #c3c3cb;
+}
+
+body {
+  font-family: var(--tunupa-font-body);
+  color: var(--ink);
+  background: var(--canvas);
+}
+
+.topbar h1,
+.summary-grid strong,
+.panel-heading h2,
+.section-heading h2,
+.measurement-value,
+.auth-card h1,
+.admin-clients-header h1 {
+  font-family: var(--tunupa-font-display);
+}
+
+/* El sidebar mantiene su estructura y el fondo neutro elegido. */
+.sidebar {
+  background: var(--tunupa-neutral-dark);
+  border-right-color: #414047;
+}
+.brand small,
+.brand-identity small {
+  color: var(--tunupa-accent-readable);
+}
+.nav-item {
+  color: #dedee4;
+  transition: background-color .16s ease, color .16s ease;
+}
+.nav-item:hover {
+  color: #fff;
+  background: #3b2c28;
+}
+.nav-item.active {
+  color: #fff;
+  background: var(--tunupa-copper);
+  box-shadow: inset 3px 0 var(--tunupa-accent);
+}
+.sidebar-footer {
+  border-top-color: #4a4141;
+}
+
+/* La 'T' heredada es temporal: el símbolo oficial la reemplazará en Patch 04. */
+.brand-mark {
+  background: var(--tunupa-accent-readable);
+  color: var(--tunupa-neutral-dark);
+}
+
+/* Superficies, tarjetas y campos siguen utilizando los tokens existentes. */
+.summary-grid article,
+.panel,
+.measurement-card,
+.auth-card {
+  border-radius: var(--tunupa-radius-card);
+}
+.refresh-button,
+.error-banner button,
+.chart-heading select,
+.auth-card input,
+.auth-submit {
+  border-radius: var(--tunupa-radius-control);
+}
+.refresh-button:hover,
+.error-banner button:hover {
+  border-color: var(--tunupa-accent-readable);
+  background: #42312e;
+}
+.auth-submit {
+  background: var(--brand-button);
+  color: #fff;
+}
+.auth-submit:hover {
+  background: #b94600;
+}
+
+/* Destacados no semánticos; alarmas/desconexión mantienen los colores actuales. */
+.motor-row:hover,
+.motor-row.selected {
+  background: #362e30;
+}
+.motor-row.selected {
+  box-shadow: inset 3px 0 var(--tunupa-accent);
+}
+.measurement-icon {
+  background: var(--tunupa-accent-subtle);
+  color: var(--tunupa-accent-readable);
+}
+.admin-client-item:hover {
+  background: #393237;
+}
+.admin-client-item[aria-pressed='true'] {
+  background: #443029;
+  border-color: var(--tunupa-border-accent);
+}
+
+/* Foco visible y contraste para navegación con teclado. */
+:where(button, a, input, select, textarea):focus-visible,
+.motor-row:focus-visible,
+.nav-item:focus-visible,
+.admin-client-item:focus-visible {
+  outline: 3px solid var(--tunupa-focus-ring);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-item {
+    transition: none;
+  }
+}
