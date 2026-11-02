@@ -1,0 +1,272 @@
+/*
+ * TUNUPA — Patch 07: diseño de módulos existentes.
+ * Clientes, motores, ficha técnica, dispositivos y alarmas.
+ * Solo presentación: no interviene en autenticación, telemetría o permisos.
+ * Se importa después de tunupa-theme.css, tunupa-sidebar.css y tunupa-login.css.
+ * Los colores de estado operativo se heredan; NO cambiarlos por naranja de marca.
+ */
+:root {
+  --tunupa-module-panel: var(--tunupa-surface-1);
+  --tunupa-module-elevated: var(--tunupa-surface-2);
+  --tunupa-module-outline: var(--tunupa-border);
+  --tunupa-module-hover: #363037;
+  --tunupa-module-selection: #402d28;
+  --tunupa-module-heading: var(--tunupa-ice);
+  --tunupa-module-caption: #c7c5cb;
+  --tunupa-module-radius: 16px;
+}
+
+/* Encabezados: jerarquía clara sin tocar el dashboard en tiempo real. */
+.admin-clients-header {
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--tunupa-module-outline);
+}
+.admin-clients-header h1 {
+  color: var(--tunupa-module-heading);
+  font-family: var(--tunupa-font-display);
+  font-weight: 650;
+  letter-spacing: -.035em;
+}
+.admin-clients-header p {
+  max-width: 68ch;
+  line-height: 1.55;
+}
+
+/* Filtros de motores, dispositivos y alarmas: banda diferenciada del contenido. */
+.fleet-toolbar,
+.alarms-filters {
+  align-items: end;
+  padding: 17px;
+  border: 1px solid var(--tunupa-module-outline);
+  border-radius: var(--tunupa-module-radius);
+  background: var(--tunupa-module-panel);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .10);
+}
+.fleet-toolbar label,
+.alarms-filters label {
+  gap: 8px;
+  color: var(--tunupa-module-caption);
+  font-weight: 650;
+  letter-spacing: .01em;
+}
+.fleet-toolbar input,
+.fleet-toolbar select,
+.alarms-filters input,
+.alarms-filters select,
+.admin-form input,
+.admin-client-detail .admin-form select {
+  min-height: 44px;
+  border: 1px solid #65616a;
+  border-radius: 10px;
+  background: var(--tunupa-module-elevated);
+  color: var(--tunupa-ice);
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+.fleet-toolbar input:hover,
+.fleet-toolbar select:hover,
+.alarms-filters input:hover,
+.alarms-filters select:hover,
+.admin-form input:hover,
+.admin-client-detail .admin-form select:hover {
+  border-color: #9b7058;
+}
+.fleet-toolbar input:focus-visible,
+.fleet-toolbar select:focus-visible,
+.alarms-filters input:focus-visible,
+.alarms-filters select:focus-visible,
+.admin-form input:focus-visible,
+.admin-client-detail .admin-form select:focus-visible {
+  outline: 3px solid var(--tunupa-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Contenedores del inventario y tablas con encabezado distinguible. */
+.fleet-panel,
+.fleet-detail-panel,
+.admin-client-detail,
+.admin-clients-list,
+.alarms-detail {
+  border-color: var(--tunupa-module-outline);
+  border-radius: var(--tunupa-module-radius);
+  background: var(--tunupa-module-panel);
+}
+.fleet-panel .panel-heading,
+.fleet-detail-panel .panel-heading,
+.admin-client-detail .panel-heading {
+  padding-inline: 4px;
+  padding-bottom: 19px;
+}
+.fleet-table-wrap,
+.admin-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-color: #80523d #26272c;
+  scrollbar-width: thin;
+}
+.fleet-table,
+.admin-data-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.fleet-table th,
+.admin-data-table th {
+  padding-block: 14px;
+  background: #323038;
+  color: #e0d6d1;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid #665046;
+}
+.fleet-table td,
+.admin-data-table td {
+  padding-block: 17px;
+  border-bottom: 1px solid #414047;
+  color: var(--tunupa-ice);
+  line-height: 1.5;
+}
+.fleet-table tbody tr,
+.admin-data-table tbody tr {
+  transition: background-color .16s ease;
+}
+.fleet-table tbody tr:hover,
+.admin-data-table tbody tr:hover {
+  background: var(--tunupa-module-hover);
+}
+.fleet-link,
+.fleet-back,
+.fleet-detail-jump a,
+.alarms-detail-grid a {
+  color: var(--tunupa-orange-light);
+  text-underline-offset: 3px;
+}
+.fleet-link:hover,
+.fleet-back:hover,
+.fleet-detail-jump a:hover,
+.alarms-detail-grid a:hover {
+  color: #ffc099;
+}
+
+/* Clientes: selección reconocible y separación de secciones. */
+.admin-clients-list { gap: 8px; }
+.admin-client-item {
+  min-height: 62px;
+  padding: 14px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition: background-color .16s ease, border-color .16s ease;
+}
+.admin-client-item:hover { background: var(--tunupa-module-hover); }
+.admin-client-item[aria-pressed='true'] {
+  background: var(--tunupa-module-selection);
+  border-color: #a86540;
+  box-shadow: inset 3px 0 var(--tunupa-orange);
+}
+.admin-client-detail h2,
+.admin-client-detail h3 {
+  font-family: var(--tunupa-font-display);
+  color: var(--tunupa-module-heading);
+}
+.admin-client-stats {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--tunupa-module-outline);
+}
+.admin-form { gap: 16px; }
+.admin-form label { color: var(--tunupa-module-caption); font-weight: 600; }
+.admin-form button {
+  min-height: 44px;
+  border-radius: 10px;
+  background: var(--brand-button);
+  color: #fff;
+  font-weight: 700;
+  transition: background-color .16s ease;
+}
+.admin-form button:hover:not(:disabled) { background: #b94600; }
+.admin-form button:focus-visible,
+.admin-client-item:focus-visible,
+.alarms-detail-button:focus-visible,
+.alarms-pager button:focus-visible {
+  outline: 3px solid var(--tunupa-focus-ring);
+  outline-offset: 3px;
+}
+
+/* Fichas técnicas: métricas legibles y resumen de varias columnas. */
+.fleet-detail-summary article {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--tunupa-module-outline);
+  border-radius: var(--tunupa-module-radius);
+  background: var(--tunupa-module-panel);
+  box-shadow: 0 9px 20px rgba(0, 0, 0, .08);
+}
+.fleet-detail-summary article > span { color: var(--tunupa-module-caption); }
+.fleet-detail-summary article > strong {
+  color: var(--tunupa-module-heading);
+  font-family: var(--tunupa-font-display);
+  font-size: clamp(17px, 2vw, 23px);
+  line-height: 1.25;
+}
+.fleet-specs { row-gap: 22px; }
+.fleet-specs > div {
+  border-left: 2px solid #76503a;
+  padding-left: 12px;
+}
+.fleet-specs dt { color: var(--tunupa-module-caption); }
+.fleet-specs dd { line-height: 1.5; }
+.fleet-readings .measurement-card { border-color: var(--tunupa-module-outline); }
+
+/* Alarmas: filtros y detalle son visualmente consistentes; severidad intacta. */
+.alarms-filters { margin-top: 20px; }
+.alarms-detail {
+  border: 1px solid var(--tunupa-module-outline);
+  overflow: hidden;
+}
+.alarms-detail-grid {
+  gap: 18px;
+  background: #2d2b31;
+  border-bottom: 1px solid var(--tunupa-module-outline);
+}
+.alarms-detail-grid div { gap: 8px; }
+.alarms-detail-grid small { color: var(--tunupa-module-caption); }
+.alarms-message { overflow-wrap: anywhere; }
+.alarms-timeline { gap: 14px; }
+.alarms-timeline li {
+  padding: 11px 12px 11px 15px;
+  border-left: 2px solid var(--tunupa-orange-light);
+  border-radius: 0 8px 8px 0;
+  background: #343035;
+}
+.alarms-pager button:not(:disabled) { cursor: pointer; }
+.alarms-detail-button { min-height: 36px; }
+
+/* Formularios y filtros conservan sus nombres, eventos, API y estados. */
+@media (max-width: 760px) {
+  .fleet-toolbar,
+  .alarms-filters { padding: 14px; }
+  .fleet-table th,
+  .fleet-table td,
+  .admin-data-table th,
+  .admin-data-table td { padding-inline: 11px; }
+  .fleet-detail-summary article { padding: 16px; }
+  .admin-client-detail { padding: 16px; }
+}
+@media (max-width: 600px) {
+  .admin-clients-header { align-items: flex-start; }
+  .alarms-filters { grid-template-columns: 1fr; }
+  .admin-form { grid-template-columns: minmax(0, 1fr); padding: 14px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fleet-toolbar input,
+  .fleet-toolbar select,
+  .alarms-filters input,
+  .alarms-filters select,
+  .admin-form input,
+  .admin-client-detail .admin-form select,
+  .fleet-table tbody tr,
+  .admin-data-table tbody tr,
+  .admin-client-item,
+  .admin-form button { transition: none; }
+}

@@ -7,6 +7,7 @@ import '../styles/tunupa-brand-tokens.css';
 import '../styles/tunupa-theme.css';
 import '../styles/tunupa-sidebar.css';
 import '../styles/tunupa-login.css';
+import '../styles/tunupa-modules.css';
 
 export const metadata: Metadata = {
   title: 'TUNUPA | Gestor de motores',
