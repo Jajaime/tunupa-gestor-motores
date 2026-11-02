@@ -103,7 +103,7 @@ export function AlarmsPage() {
       <section className="content">
         <header className="topbar">
           <div>
-            <span className="eyebrow">GROUNDTEK · SEGUIMIENTO OPERATIVO</span>
+            <span className="eyebrow">TUNUPA DATA · SEGUIMIENTO OPERATIVO</span>
             <h1>Alarmas y eventos</h1>
             <p>Alertas, historial de estados y gestiones de tus motores autorizados.</p>
           </div>

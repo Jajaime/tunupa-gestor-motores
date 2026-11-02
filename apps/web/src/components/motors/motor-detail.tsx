@@ -44,7 +44,7 @@ export function MotorDetail({ motorId }: { motorId: string }) {
         <header className="topbar">
           <div>
             <Link className="fleet-back" href="/motors">← Volver a Mis motores</Link>
-            <span className="eyebrow">GROUNDTEK · FICHA INDIVIDUAL</span>
+            <span className="eyebrow">TUNUPA DATA · FICHA INDIVIDUAL</span>
             <h1>{record?.name ?? 'Ficha del motor'}</h1>
             <p>{record ? `${record.clientName} · ${record.plantName} · ${record.code}`
               : 'Consulta de datos técnicos y operación.'}</p>

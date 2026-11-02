@@ -132,7 +132,7 @@ export function DevicesPage() {
       <section className="content">
         <header className="topbar">
           <div>
-            <span className="eyebrow">GROUNDTEK · DISPOSITIVOS DE MEDICIÓN</span>
+            <span className="eyebrow">TUNUPA DATA · DISPOSITIVOS DE MEDICIÓN</span>
             <h1>Dispositivos</h1>
             <p>Gateways vinculados a motores y últimos registros de conectividad.</p>
           </div>

@@ -13,7 +13,7 @@ export class AdminOnlyGuard implements CanActivate {
     const user = request.user;
     if (user?.role !== 'ADMIN') {
       throw new ForbiddenException(
-        'Acceso reservado a administración GroundTEK.',
+        'Acceso reservado a administración TUNUPA DATA.',
       );
     }
     return true;

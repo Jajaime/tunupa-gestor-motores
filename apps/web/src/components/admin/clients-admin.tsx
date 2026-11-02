@@ -121,7 +121,7 @@ export function ClientsAdmin() {
       <main className="auth-screen">
         <section className="auth-card" role="alert">
           <h1>Acceso restringido</h1>
-          <p>La gestión de clientes está reservada a los administradores GroundTEK.</p>
+          <p>La gestión de clientes está reservada a los administradores TUNUPA DATA.</p>
           <Link href="/">Volver al panel</Link>
         </section>
       </main>
@@ -134,7 +134,7 @@ export function ClientsAdmin() {
       <section className="content">
         <header className="admin-clients-header">
           <div>
-            <span className="eyebrow">ADMINISTRACIÓN GROUNDTEK</span>
+            <span className="eyebrow">ADMINISTRACIÓN TUNUPA DATA</span>
             <h1>Clientes</h1>
             <p>Registra empresas, vincula plantas y consulta sus motores.</p>
           </div>

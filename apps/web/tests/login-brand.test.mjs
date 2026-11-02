@@ -43,3 +43,15 @@ test('tema login está aislado, es responsive y se carga después del tema anter
   assert.match(theme, /@media \(prefers-reduced-motion: reduce\)/);
   assert.doesNotMatch(theme, /\.status-pill|\.live-dot|\.status-beacon|\.realtime-connected/);
 });
+
+test('login cabe en la altura visible de escritorio sin bloquear scroll accesible', () => {
+  const compact = theme.slice(theme.indexOf('/* Ajuste del login en escritorio/notebook'));
+  assert.match(compact, /@media \(min-width: 721px\)/);
+  assert.match(compact, /height:\s*100dvh/);
+  assert.match(compact, /height:\s*min\(710px, calc\(100dvh/);
+  assert.match(compact, /\.tunupa-login-story-copy\s*\{\s*margin-top:\s*clamp/);
+  assert.match(compact, /\.tunupa-login-story-foot\s*\{\s*padding-top:\s*clamp/);
+  assert.match(compact, /overflow-y:\s*auto/);
+  assert.doesNotMatch(compact, /(?:html|body)\s*\{|overflow:\s*hidden/);
+  assert.match(theme, /@media \(max-width: 720px\)/);
+});

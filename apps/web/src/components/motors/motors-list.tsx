@@ -45,7 +45,7 @@ export function MotorsList() {
       <section className="content">
         <header className="topbar">
           <div>
-            <span className="eyebrow">GROUNDTEK · INVENTARIO OPERATIVO</span>
+            <span className="eyebrow">TUNUPA DATA · INVENTARIO OPERATIVO</span>
             <h1>Mis motores</h1>
             <p>Fichas técnicas y estado de los equipos autorizados para tu sesión.</p>
           </div>
