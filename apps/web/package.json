@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "npm run typecheck && npm run test:auth && npm run test:dashboard && npm run test:realtime && npm run test:updates && npm run test:navigation && npm run test:brand && npm run test:theme && npm run test:icons && npm run test:sidebar-brand && npm run test:login-brand && npm run test:modules-brand && npm run test:dashboard-brand",
+    "test": "npm run typecheck && npm run test:auth && npm run test:dashboard && npm run test:realtime && npm run test:updates && npm run test:navigation && npm run test:brand && npm run test:theme && npm run test:icons && npm run test:sidebar-brand && npm run test:login-brand && npm run test:modules-brand && npm run test:dashboard-brand && npm run test:visual-polish",
     "test:auth": "node --test tests/auth-api.test.mjs",
     "test:dashboard": "node --test tests/dashboard-status.test.mjs",
     "test:realtime": "node --test tests/realtime-session.test.mjs",
@@ -20,7 +20,8 @@
     "test:sidebar-brand": "node --test tests/sidebar-brand.test.mjs",
     "test:login-brand": "node --test tests/login-brand.test.mjs",
     "test:modules-brand": "node --test tests/modules-brand.test.mjs",
-    "test:dashboard-brand": "node --test tests/dashboard-brand.test.mjs"
+    "test:dashboard-brand": "node --test tests/dashboard-brand.test.mjs",
+    "test:visual-polish": "node --test tests/visual-polish.test.mjs"
   },
   "dependencies": {
     "next": "16.4.3",

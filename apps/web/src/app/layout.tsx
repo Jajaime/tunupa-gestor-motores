@@ -9,6 +9,7 @@ import '../styles/tunupa-sidebar.css';
 import '../styles/tunupa-login.css';
 import '../styles/tunupa-modules.css';
 import '../styles/tunupa-dashboard.css';
+import '../styles/tunupa-polish.css';
 
 export const metadata: Metadata = {
   title: 'TUNUPA | Gestor de motores',

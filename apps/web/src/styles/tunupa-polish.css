@@ -1,0 +1,110 @@
+/*
+ * TUNUPA — Patch 08: refinamiento responsivo y de accesibilidad.
+ * Se importa después de los estilos de dashboard y módulos.
+ * Solo presentación: no cambia rutas, permisos, alarmas ni colores operativos.
+ */
+:root {
+  --tunupa-polish-outline: #5b4b4b;
+  --tunupa-polish-focus: var(--tunupa-focus-ring);
+}
+
+/* Ningún nombre largo de motor, planta o usuario debe romper el área central. */
+.app-shell > .content { min-width: 0; }
+.app-shell > .content .topbar > div,
+.app-shell > .content .panel-heading > div,
+.app-shell > .content .section-heading > div { min-width: 0; }
+.app-shell > .content h1,
+.app-shell > .content h2,
+.app-shell > .content .session-user,
+.app-shell > .content .fleet-specs dd { overflow-wrap: anywhere; }
+
+/* Jerarquía consistente en las pantallas de módulos que no son el dashboard. */
+.content:not(#dashboard) .topbar {
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--tunupa-polish-outline);
+}
+.content:not(#dashboard) .topbar h1,
+.content:not(#dashboard) .admin-clients-header h1 {
+  color: var(--tunupa-ice);
+  font-family: var(--tunupa-font-display);
+  font-size: clamp(27px, 3.1vw, 39px);
+  line-height: 1.2;
+  letter-spacing: -.032em;
+  font-weight: 700;
+}
+.content:not(#dashboard) .topbar p { color: var(--tunupa-text-muted); line-height: 1.6; }
+.content:not(#dashboard) .session-actions { min-width: 0; }
+.content:not(#dashboard) .session-actions > div { gap: 9px; }
+
+/* Consistencia de superficies, interacción y desplazamiento. */
+.app-shell > .content .panel,
+.app-shell > .content .fleet-detail-summary article { border-color: var(--tunupa-border); }
+.app-shell > .content :where(.refresh-button, .alarms-pager button, .admin-form button) {
+  min-height: 44px;
+  border-radius: var(--tunupa-radius-control);
+}
+.app-shell > .content :where(.refresh-button, .alarms-pager button, .admin-form button):focus-visible,
+.app-shell > .content :where(input, select, textarea, a):focus-visible {
+  outline: 3px solid var(--tunupa-polish-focus);
+  outline-offset: 2px;
+}
+.app-shell > .content :where(.fleet-table-wrap, .admin-table-scroll) {
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #986344 #28262b;
+}
+.app-shell > .content :where(.fleet-toolbar, .admin-form, .alarms-filters) > * { min-width: 0; }
+
+/* Dashboard: el histórico se ajusta al espacio, sin desplazar el sidebar. */
+#dashboard .chart-panel,
+#dashboard .chart-container,
+#dashboard .measurement-card { min-width: 0; }
+#dashboard .chart-heading select { max-width: 100%; }
+#dashboard .measurement-value { overflow-wrap: anywhere; }
+
+@media (max-width: 1000px) {
+  .content:not(#dashboard) .topbar { align-items: flex-start; flex-wrap: wrap; }
+  .content:not(#dashboard) .session-actions {
+    width: 100%;
+    text-align: left;
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+  }
+  .content:not(#dashboard) .session-actions > div { justify-content: flex-start; }
+}
+
+@media (max-width: 760px) {
+  .content:not(#dashboard) .topbar { gap: 12px; }
+  /* Restituye los textos auxiliares que ocultaba el CSS histórico en móvil. */
+  .content:not(#dashboard) .topbar p { display: block; font-size: 13px; }
+  .app-shell > .content .panel-heading { flex-wrap: wrap; gap: 11px; }
+  .app-shell > .content .fleet-table-wrap,
+  .app-shell > .content .admin-table-scroll { -webkit-overflow-scrolling: touch; }
+}
+
+@media (max-width: 400px) {
+  /* Evita cifras estrechas y recortes en teléfonos pequeños. */
+  #dashboard .summary-grid { grid-template-columns: minmax(0, 1fr); }
+  #dashboard .measurements-grid { grid-template-columns: minmax(0, 1fr); }
+  #dashboard .summary-grid article { min-height: 116px; }
+  .content:not(#dashboard) .session-actions > div { width: 100%; }
+  .content:not(#dashboard) .session-actions .refresh-button { flex: 1 1 auto; }
+}
+
+@media (prefers-contrast: more) {
+  .app-shell > .content .panel,
+  .app-shell > .content .measurement-card,
+  #dashboard .summary-grid article { border-color: #c49a80; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell > .content *,
+  .app-shell > .content *::before,
+  .app-shell > .content *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
