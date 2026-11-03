@@ -354,3 +354,53 @@ export function updateDevice(id: string, data: {
 }): Promise<DeviceInventory> {
   return mutate<DeviceInventory>(`/devices/${encodeURIComponent(id)}`, data, 'PATCH');
 }
+
+// Administración de motores: endpoints existentes protegidos por AdminOnlyGuard.
+// Los clientes y operadores continúan usando /fleet/motors (solo lectura).
+export type AdminMotorStatus = 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'OUT_OF_SERVICE';
+
+export interface AdminMotorRecord {
+  id: string;
+  plantId: string;
+  name: string;
+  code: string;
+  manufacturer: string | null;
+  model: string | null;
+  serialNumber: string | null;
+  ratedPowerKw: number | null;
+  ratedVoltage: number | null;
+  ratedCurrent: number | null;
+  ratedFrequencyHz: number | null;
+  status: AdminMotorStatus;
+  operationalStatus: string;
+  lastTelemetryAt: string | null;
+}
+
+export interface UpdateAdminMotor {
+  name: string;
+  code: string;
+  manufacturer: string | null;
+  model: string | null;
+  serialNumber: string | null;
+  ratedPowerKw: number | null;
+  ratedVoltage: number | null;
+  ratedCurrent: number | null;
+  ratedFrequencyHz: number | null;
+  status: AdminMotorStatus;
+}
+
+export interface CreateAdminMotor extends UpdateAdminMotor {
+  plantId: string;
+}
+
+export function getAdminMotor(id: string): Promise<AdminMotorRecord> {
+  return request<AdminMotorRecord>(`/motors/${encodeURIComponent(id)}`);
+}
+
+export function createAdminMotor(data: CreateAdminMotor): Promise<AdminMotorRecord> {
+  return mutate<AdminMotorRecord>('/motors', data);
+}
+
+export function updateAdminMotor(id: string, data: UpdateAdminMotor): Promise<AdminMotorRecord> {
+  return mutate<AdminMotorRecord>(`/motors/${encodeURIComponent(id)}`, data, 'PATCH');
+}

@@ -1,0 +1,55 @@
+/* TUNUPA — Patch 10. Gestión de motores exclusiva de administración.
+ * Se importa después de los estilos de los módulos y del dashboard.
+ * No redefine estados de conexión ni severidades de alarmas.
+ */
+.tunupa-motors-admin .tunupa-motors-admin-filters {
+  margin-top: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.tunupa-motors-admin .fleet-table { min-width: 650px; }
+.tunupa-motors-admin .tunupa-motors-admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+.tunupa-motors-admin .tunupa-motors-admin-actions .refresh-button {
+  min-height: 38px;
+  padding: 8px 13px;
+}
+.tunupa-motors-admin .tunupa-motor-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 17px;
+  padding: 23px;
+}
+.tunupa-motor-form label { min-width: 0; }
+.tunupa-motor-form :is(input, select) {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #65616a;
+  border-radius: 10px;
+  background: var(--tunupa-surface-2);
+  color: var(--tunupa-ice);
+  padding: 10px 12px;
+}
+.tunupa-motor-form :is(input, select):focus-visible {
+  outline: 3px solid var(--tunupa-focus-ring);
+  outline-offset: 2px;
+}
+.tunupa-motor-form :is(input, select):disabled { opacity: .65; cursor: not-allowed; }
+.tunupa-motor-form .tunupa-motor-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-top: 1px solid var(--tunupa-border);
+  padding-top: 16px;
+}
+.tunupa-motor-form-footer small { color: var(--tunupa-text-muted); line-height: 1.45; }
+.tunupa-motor-form-footer button { min-width: 170px; }
+@media (max-width: 760px) {
+  .tunupa-motors-admin .tunupa-motors-admin-filters,
+  .tunupa-motors-admin .tunupa-motor-form { grid-template-columns: minmax(0, 1fr); }
+  .tunupa-motors-admin .tunupa-motor-form { padding: 16px; }
+}

@@ -35,6 +35,12 @@ function NavigationIcon({ id }: { id: SidebarItem['id'] }) {
           <path d="M8 8V4.5h8V8M9 12h2m2 0h2m-6 4h2m2 0h2M12 21v-4" />
         </>
       )}
+      {id === 'adminMotors' && (
+        <>
+          <rect x="3" y="7" width="18" height="14" rx="2" />
+          <path d="M8 7V4h8v3M3 12h18M12 10v4" />
+        </>
+      )}
       {id === 'motors' && (
         <>
           <circle cx="12" cy="12" r="8" />
