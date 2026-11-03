@@ -10,6 +10,7 @@ test('administración puede acceder al panel y a clientes', () => {
     { id: 'motors', href: '/motors', label: 'Mis motores' },
     { id: 'alarms', href: '/alarms', label: 'Alarmas y eventos' },
     { id: 'trends', href: '/trends', label: 'Tendencias' },
+    { id: 'reports', href: '/reports', label: 'Informes' },
     { id: 'devices', href: '/devices', label: 'Dispositivos' },
   ]);
 });
@@ -21,6 +22,7 @@ test('operador y visor no ven la administración', () => {
       { id: 'motors', href: '/motors', label: 'Mis motores' },
       { id: 'alarms', href: '/alarms', label: 'Alarmas y eventos' },
     { id: 'trends', href: '/trends', label: 'Tendencias' },
+    { id: 'reports', href: '/reports', label: 'Informes' },
       { id: 'devices', href: '/devices', label: 'Dispositivos' },
     ]);
   }
@@ -31,6 +33,6 @@ test('operador y visor no ven la administración', () => {
 
 test('la navegación solo publica rutas implementadas', () => {
   for (const role of ['ADMIN', 'OPERATOR', 'VIEWER']) {
-    assert.ok(getSidebarItems(role).every((item) => ['/', '/admin/clients', '/admin/motors', '/motors', '/alarms', '/trends', '/devices'].includes(item.href)));
+    assert.ok(getSidebarItems(role).every((item) => ['/', '/admin/clients', '/admin/motors', '/motors', '/alarms', '/trends', '/reports', '/devices'].includes(item.href)));
   }
 });

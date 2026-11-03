@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "npm run typecheck && npm run test:auth && npm run test:dashboard && npm run test:realtime && npm run test:updates && npm run test:navigation && npm run test:brand && npm run test:theme && npm run test:icons && npm run test:sidebar-brand && npm run test:login-brand && npm run test:modules-brand && npm run test:dashboard-brand && npm run test:visual-polish && npm run test:release-gate && npm run test:admin-motors && npm run test:trends",
+    "test": "npm run typecheck && npm run test:auth && npm run test:dashboard && npm run test:realtime && npm run test:updates && npm run test:navigation && npm run test:brand && npm run test:theme && npm run test:icons && npm run test:sidebar-brand && npm run test:login-brand && npm run test:modules-brand && npm run test:dashboard-brand && npm run test:visual-polish && npm run test:release-gate && npm run test:admin-motors && npm run test:trends && npm run test:reports",
     "test:auth": "node --test tests/auth-api.test.mjs",
     "test:dashboard": "node --test tests/dashboard-status.test.mjs",
     "test:realtime": "node --test tests/realtime-session.test.mjs",
@@ -25,6 +25,7 @@
     "test:release-gate": "node --test tests/release-gate.test.mjs",
     "test:admin-motors": "node --test tests/admin-motors.test.mjs",
     "test:trends": "node --test tests/trends.test.mjs",
+    "test:reports": "node --test tests/reports.test.mjs",
     "verify:deployment": "node scripts/verify-deployment.mjs"
   },
   "dependencies": {
