@@ -17,6 +17,7 @@ import { TenantAccessModule } from './tenant-access/tenant-access.module';
 import { FleetModule } from './fleet/fleet.module';
 import { AlarmsModule } from './alarms/alarms.module';
 import { DevicesModule } from './devices/devices.module';
+import { TrendsModule } from './trends/trends.module';
 import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { CsrfGuard } from './auth/guards/csrf.guard';
 
@@ -89,6 +90,7 @@ import { CsrfGuard } from './auth/guards/csrf.guard';
     FleetModule,
     AlarmsModule,
     DevicesModule,
+    TrendsModule,
   ],
   controllers: [AppController],
   providers: [

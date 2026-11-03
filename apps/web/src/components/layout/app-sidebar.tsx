@@ -55,6 +55,12 @@ function NavigationIcon({ id }: { id: SidebarItem['id'] }) {
           <path d="M12 9v5m0 3h.01" />
         </>
       )}
+      {id === 'trends' && (
+        <>
+          <path d="M3 19h18M5 16l5-6 4 3 5-8" />
+          <path d="M5 4v12M19 5v14" />
+        </>
+      )}
       {id === 'devices' && (
         <>
           <rect x="3" y="6" width="18" height="13" rx="2" />

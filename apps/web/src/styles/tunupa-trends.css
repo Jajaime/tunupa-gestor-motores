@@ -1,0 +1,32 @@
+/* Patch 11 · Tendencias: isolation within .tunupa-trends. */
+.tunupa-trends .topbar { align-items: center; }
+.tunupa-trends .topbar p { max-width: 65ch; }
+.tunupa-trends .trends-filters-panel { overflow: visible; }
+.tunupa-trends .trends-filters-panel .panel-heading { padding: 20px 24px; }
+.tunupa-trends .trends-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px; padding: 23px; }
+.tunupa-trends .trends-filters label { display: grid; gap: 8px; min-width: 0; color: #ddd0cd; font-weight: 650; font-size: 12px; }
+.tunupa-trends .trends-filters :is(select, input) { width: 100%; min-width: 0; min-height: 45px; border: 1px solid #777078; border-radius: 10px; color: var(--ink); background: var(--surface-raised); padding: 10px 12px; font: inherit; }
+.tunupa-trends .trends-filters :is(select, input):focus-visible { outline: 3px solid var(--tunupa-focus-ring); outline-offset: 2px; }
+.tunupa-trends .trends-actions { display: flex; align-items: center; flex-wrap: wrap; grid-column: 1/-1; gap: 14px; }
+.tunupa-trends .trends-actions button { width: auto; min-width: 190px; margin: 0; }
+.tunupa-trends .trends-actions span { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.tunupa-trends .trends-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin: 20px 0 22px; }
+.tunupa-trends .trends-summary article { min-width: 0; padding: 20px; border: 1px solid #594a47; border-radius: 15px; background: var(--surface); border-top: 3px solid var(--tunupa-orange-light); }
+.tunupa-trends .trends-summary article > span { display: block; color: #d4c4c3; font-size: 12px; }
+.tunupa-trends .trends-summary strong { display: block; margin-top: 10px; color: var(--ink); font-family: var(--tunupa-font-display); font-size: clamp(22px, 2.5vw, 29px); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.tunupa-trends .trends-summary small { font-size: 12px; color: var(--muted); font-weight: 500; }
+.tunupa-trends .trends-chart { min-width: 0; height: 360px; padding: 16px 18px 14px 8px; }
+.tunupa-trends .trends-empty { padding: 24px; color: #d4c8ca; line-height: 1.6; }
+.tunupa-trends .trends-note { margin: 0; padding: 14px 22px 22px; color: #ccc2c6; font-size: 12px; line-height: 1.7; }
+.tunupa-trends .trends-detail-link { text-align: right; }
+.tunupa-trends .trends-detail-link a { color: var(--tunupa-orange-light); }
+@media (max-width: 1100px) { .tunupa-trends .trends-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .tunupa-trends .topbar { align-items: flex-start; flex-wrap: wrap; }
+  .tunupa-trends .trends-filters { grid-template-columns: minmax(0, 1fr); padding: 15px; }
+  .tunupa-trends .trends-actions { align-items: stretch; }
+  .tunupa-trends .trends-actions button { width: 100%; }
+  .tunupa-trends .trends-chart { height: 290px; padding-inline: 4px; }
+  .tunupa-trends .trends-summary article { padding: 16px; }
+}
+@media (max-width: 400px) { .tunupa-trends .trends-summary { grid-template-columns: minmax(0, 1fr); } }

@@ -404,3 +404,13 @@ export function createAdminMotor(data: CreateAdminMotor): Promise<AdminMotorReco
 export function updateAdminMotor(id: string, data: UpdateAdminMotor): Promise<AdminMotorRecord> {
   return mutate<AdminMotorRecord>(`/motors/${encodeURIComponent(id)}`, data, 'PATCH');
 }
+
+// Lectura de series agregadas; la API revalida tenant, fechas y granularidad.
+export function getMotorTrends(motorId: string, params: {
+  measurementType: string; from: string; to: string; bucket: string;
+}): Promise<import('./trends-model').TrendPoint[]> {
+  const query = new URLSearchParams(params);
+  return request<import('./trends-model').TrendPoint[]>(
+    `/trends/motors/${encodeURIComponent(motorId)}?${query}`,
+  );
+}
