@@ -18,6 +18,7 @@ import { FleetModule } from './fleet/fleet.module';
 import { AlarmsModule } from './alarms/alarms.module';
 import { DevicesModule } from './devices/devices.module';
 import { TrendsModule } from './trends/trends.module';
+import { AccountModule } from './account/account.module';
 import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { CsrfGuard } from './auth/guards/csrf.guard';
 
@@ -91,6 +92,7 @@ import { CsrfGuard } from './auth/guards/csrf.guard';
     AlarmsModule,
     DevicesModule,
     TrendsModule,
+    AccountModule,
   ],
   controllers: [AppController],
   providers: [

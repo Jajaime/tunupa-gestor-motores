@@ -13,6 +13,7 @@ import '../styles/tunupa-polish.css';
 import '../styles/tunupa-admin-motors.css';
 import '../styles/tunupa-trends.css';
 import '../styles/tunupa-reports.css';
+import '../styles/tunupa-account.css';
 
 export const metadata: Metadata = {
   title: 'TUNUPA | Gestor de motores',

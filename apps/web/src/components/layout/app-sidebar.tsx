@@ -73,6 +73,12 @@ function NavigationIcon({ id }: { id: SidebarItem['id'] }) {
           <path d="M7 10h6M7 14h4m5-4h1m-1 4h1M8 19v2m8-2v2" />
         </>
       )}
+      {id === 'account' && (
+        <>
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+        </>
+      )}
     </svg>
   );
 }

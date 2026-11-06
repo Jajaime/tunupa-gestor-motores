@@ -12,6 +12,7 @@ test('administración puede acceder al panel y a clientes', () => {
     { id: 'trends', href: '/trends', label: 'Tendencias' },
     { id: 'reports', href: '/reports', label: 'Informes' },
     { id: 'devices', href: '/devices', label: 'Dispositivos' },
+    { id: 'account', href: '/account', label: 'Mi cuenta' },
   ]);
 });
 
@@ -24,6 +25,7 @@ test('operador y visor no ven la administración', () => {
     { id: 'trends', href: '/trends', label: 'Tendencias' },
     { id: 'reports', href: '/reports', label: 'Informes' },
       { id: 'devices', href: '/devices', label: 'Dispositivos' },
+      { id: 'account', href: '/account', label: 'Mi cuenta' },
     ]);
   }
   assert.deepEqual(getSidebarItems(undefined), [
@@ -33,6 +35,6 @@ test('operador y visor no ven la administración', () => {
 
 test('la navegación solo publica rutas implementadas', () => {
   for (const role of ['ADMIN', 'OPERATOR', 'VIEWER']) {
-    assert.ok(getSidebarItems(role).every((item) => ['/', '/admin/clients', '/admin/motors', '/motors', '/alarms', '/trends', '/reports', '/devices'].includes(item.href)));
+    assert.ok(getSidebarItems(role).every((item) => ['/', '/admin/clients', '/admin/motors', '/motors', '/alarms', '/trends', '/reports', '/devices', '/account'].includes(item.href)));
   }
 });

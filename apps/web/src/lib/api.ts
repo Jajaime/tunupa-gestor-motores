@@ -414,3 +414,37 @@ export function getMotorTrends(motorId: string, params: {
     `/trends/motors/${encodeURIComponent(motorId)}?${query}`,
   );
 }
+
+export interface AccountProfile {
+  id: string;
+  email: string;
+  displayName: string;
+  role: 'ADMIN' | 'OPERATOR' | 'VIEWER';
+  lastLoginAt: string | null;
+  passwordChangedAt: string;
+}
+
+export interface AccountSession {
+  id: string;
+  createdAt: string;
+  expiresAt: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  isCurrent: boolean;
+}
+
+export function getAccountProfile(): Promise<AccountProfile> {
+  return request<AccountProfile>('/account/profile');
+}
+export function getAccountSessions(): Promise<AccountSession[]> {
+  return request<AccountSession[]>('/account/sessions');
+}
+export function changeAccountPassword(currentPassword: string, newPassword: string): Promise<{ revokedSessions: number }> {
+  return mutate<{ revokedSessions: number }>('/account/password', { currentPassword, newPassword });
+}
+export function revokeAccountSession(id: string): Promise<void> {
+  return mutate<void>(`/account/sessions/${encodeURIComponent(id)}/revoke`, {});
+}
+export function revokeOtherAccountSessions(): Promise<{ revokedSessions: number }> {
+  return mutate<{ revokedSessions: number }>('/account/sessions/revoke-others', {});
+}
